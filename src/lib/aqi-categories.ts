@@ -30,10 +30,10 @@ export function describeCategory(
     // Unknown id: show a readable version rather than failing.
     return { id, label: humaniseCategoryId(id), rank: null, isUnknown: true };
   }
-  const match = categories[index];
+  const match = categories[index]!;
   return {
     id: match.id,
-    label: match.label ?? humaniseCategoryId(match.id),
+    label: match.label || humaniseCategoryId(match.id),
     rank: index,
     isUnknown: false,
   };

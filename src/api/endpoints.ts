@@ -3,6 +3,7 @@
  * Nothing outside this folder calls fetch.
  */
 import { apiGet, encodePathSegment, request } from "./client";
+
 import type {
   CurrentAqi,
   ExceedanceSummary,

@@ -113,7 +113,10 @@ export function encodePathSegment(value: string): string {
 
 export async function apiGet<T>(
   path: string,
-  options: { query?: Record<string, QueryValue>; signal?: AbortSignal } = {},
+  options: {
+    query?: Record<string, QueryValue> | undefined;
+    signal?: AbortSignal | undefined;
+  } = {},
 ): Promise<T> {
   return request<T>("GET", path, options);
 }
@@ -122,9 +125,9 @@ export async function request<T>(
   method: string,
   path: string,
   options: {
-    query?: Record<string, QueryValue>;
+    query?: Record<string, QueryValue> | undefined;
     body?: unknown;
-    signal?: AbortSignal;
+    signal?: AbortSignal | undefined;
   } = {},
 ): Promise<T> {
   const url = buildUrl(path, options.query);

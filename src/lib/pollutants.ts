@@ -16,8 +16,9 @@ export function formatPollutantId(id: string): string {
   if (!trimmed) return id;
   const compact = /^([a-zA-Z]+)(\d{2,})$/.exec(trimmed);
   if (compact) {
-    const [, letters, digits] = compact;
-    return `${letters.toUpperCase()}${digits[0]}.${digits.slice(1)}`;
+    const letters = compact[1]!;
+    const digits = compact[2]!;
+    return `${letters.toUpperCase()}${digits.slice(0, 1)}.${digits.slice(1)}`;
   }
   return trimmed.replace(/[_-]+/g, " ").toUpperCase();
 }

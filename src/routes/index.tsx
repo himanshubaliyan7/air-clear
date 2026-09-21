@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
 function RegionGateway() {
   const navigate = useNavigate();
   const { data, isPending, error, refetch } = useQuery(regionsQuery());
-  const onlyRegionId = data && data.length === 1 ? data[0].id : null;
+  const onlyRegionId = data && data.length === 1 ? (data[0]?.id ?? null) : null;
 
   useEffect(() => {
     if (!onlyRegionId) return;
