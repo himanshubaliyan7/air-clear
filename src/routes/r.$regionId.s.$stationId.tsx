@@ -321,12 +321,36 @@ function OutlookContent({
   regionContext: ReturnType<typeof useRegion>;
 }) {
   const view = describeOutlook(data);
+  const madeAt = regionContext.formatAsOf(data.forecast_made_at);
   return (
     <div className={surface.section}>
-      <div className={`${surface.card} ${recommendationTone[view.recommendation.tone]}`}>
-        <h3 className={typography.sectionTitle}>{view.recommendation.label}</h3>
-        <p className={typography.body}>{view.recommendation.description}</p>
-      </div>
+      {view.isCurrent ? (
+        <div
+          className={`${surface.card} ${recommendationTone[view.recommendation.tone]}`}
+        >
+          <h3 className={typography.sectionTitle}>{view.recommendation.label}</h3>
+          <p className={typography.body}>{view.recommendation.description}</p>
+          {data.forecast_made_at && (
+            <p className={`${typography.small} ${surface.muted}`}>
+              {strings.outlook.madeAt(madeAt)}
+            </p>
+          )}
+        </div>
+      ) : (
+        <div className={surface.card}>
+          <p className={typography.body}>{strings.outlook.noCurrentForecast}</p>
+          <p className={`${typography.body} ${surface.muted}`}>
+            {view.state === "stale"
+              ? strings.outlook.lastForecastWas(madeAt)
+              : strings.outlook.neverForecast}
+          </p>
+          {view.hasDays && (
+            <p className={`${typography.small} ${surface.muted}`}>
+              {strings.outlook.staleDaysNote}
+            </p>
+          )}
+        </div>
+      )}
       {!view.hasDays && (
         <EmptyState
           title={strings.outlook.noneForStation}
