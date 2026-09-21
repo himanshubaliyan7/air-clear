@@ -26,8 +26,8 @@ Each phase stops for review. See `.lovable/plan/` for the approved plan.
 - [x] Phase 1 station placeholder page (identity only, no readings or outlook)
 
 ## Phase 2 — Station overview
-- [ ] Section A: current reading, per-pollutant sub-index table, attribution, all null/stale states
-- [ ] Section B: outlook recommendation + per-day breakdown, all four values
+- [x] Section A: current reading, per-pollutant sub-index table, attribution, all null/stale states
+- [x] Section B: outlook recommendation + per-day breakdown, all four values
 
 ## Phase 3 — Forecast detail
 - [ ] Forecast series chart with low/high range + table alternative

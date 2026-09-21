@@ -9,7 +9,15 @@ import { strings } from "@/i18n/strings";
 
 function locale(): string | undefined {
   if (typeof navigator === "undefined") return undefined;
-  return navigator.language || undefined;
+  const candidate = navigator.language;
+  if (!candidate) return undefined;
+  try {
+    return Intl.getCanonicalLocales(candidate)[0];
+  } catch {
+    // Some environments expose POSIX-style tags such as en-US@posix, which Intl
+    // rejects. Falling back to the runtime locale keeps formatting available.
+    return undefined;
+  }
 }
 
 export function formatDateTimeInZone(
