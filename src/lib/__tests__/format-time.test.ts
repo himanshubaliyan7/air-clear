@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   calendarDayInZone,
   formatAsOf,
+  formatCalendarDate,
   formatRelativeAge,
 } from "../format-time";
 
@@ -45,5 +46,22 @@ describe("time formatting in the region's zone", () => {
     expect(formatAsOf(null, KOLKATA)).toBe("time unknown");
     expect(formatAsOf("not-a-date", KOLKATA)).toBe("time unknown");
     expect(formatRelativeAge(null)).toBeNull();
+  });
+});
+
+describe("formatCalendarDate", () => {
+  it("prints the given calendar day and never shifts it, whatever the region's zone", () => {
+    // Regression: it used to format "noon UTC" in the region's zone, which moved
+    // 2026-09-21 to the 22nd for zones at UTC+12 or later (Auckland, Kiritimati).
+    // The day is now independent of any zone, so every region prints the 21st.
+    const printed = formatCalendarDate("2026-09-21");
+    expect(printed).toMatch(/21/);
+    expect(printed).not.toMatch(/22/);
+  });
+
+  it("returns null for missing or malformed days", () => {
+    expect(formatCalendarDate(null)).toBeNull();
+    expect(formatCalendarDate(undefined)).toBeNull();
+    expect(formatCalendarDate("not-a-day")).toBeNull();
   });
 });

@@ -323,6 +323,8 @@ export interface components {
             pollutant: string;
             /** Forecast Made At */
             forecast_made_at: string | null;
+            /** Timezone */
+            timezone?: string | null;
             /**
              * Is Current
              * @default false
@@ -342,6 +344,8 @@ export interface components {
             station_id: string;
             /** Pollutant */
             pollutant: string;
+            /** Timezone */
+            timezone?: string | null;
             /** Points */
             points: components["schemas"]["HistoryPointOut"][];
         };
@@ -408,6 +412,17 @@ export interface components {
             /** Category */
             category: string | null;
         };
+        /** PollutantInfoOut */
+        PollutantInfoOut: {
+            /** Id */
+            id: string;
+            /** Unit */
+            unit: string;
+            /** Health Threshold Concentration */
+            health_threshold_concentration: number | null;
+            /** Threshold Averaging */
+            threshold_averaging: string | null;
+        };
         /** RegionOut */
         RegionOut: {
             /** Id */
@@ -424,6 +439,8 @@ export interface components {
             aqi_standard: string;
             /** Pollutants */
             pollutants: string[];
+            /** Pollutant Details */
+            pollutant_details: components["schemas"]["PollutantInfoOut"][];
             /** Aqi Categories */
             aqi_categories: components["schemas"]["AqiCategoryOut"][];
             /** Health Threshold Category */

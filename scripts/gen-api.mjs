@@ -11,7 +11,11 @@ import { readFileSync, writeFileSync } from "node:fs";
 const SPEC = "docs/openapi.json";
 const OUT = "src/api/schema.gen.ts";
 
-execFileSync("openapi-typescript", [SPEC, "-o", OUT], { stdio: "inherit" });
+// On Windows the tool is a .cmd shim, which execFileSync cannot launch without a shell.
+execFileSync("openapi-typescript", [SPEC, "-o", OUT], {
+  stdio: "inherit",
+  shell: process.platform === "win32",
+});
 
 const banner = `/**
  * GENERATED FILE — DO NOT EDIT BY HAND.

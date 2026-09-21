@@ -53,6 +53,7 @@ describe("AQI categories", () => {
       bbox: [0, 0, 1, 1],
       aqi_standard: "S",
       pollutants: ["pm25"],
+      pollutant_details: [],
       aqi_categories: categories,
     };
     expect(
