@@ -40,7 +40,7 @@ export class ApiError extends Error {
 export const API_BASE_URL_ENV_NAME = "VITE_API_BASE_URL";
 
 export function getApiBaseUrl(): string {
-  const raw = import.meta.env.VITE_API_BASE_URL;
+  const raw = import.meta.env["VITE_API_BASE_URL"];
   return typeof raw === "string" ? raw.trim().replace(/\/+$/, "") : "";
 }
 
@@ -134,17 +134,18 @@ export async function request<T>(
 
   let response: Response;
   try {
-    response = await fetch(url, {
+    const init: RequestInit = {
       method,
-      signal: options.signal,
       headers: {
         Accept: "application/json",
         ...(options.body === undefined
           ? {}
           : { "Content-Type": "application/json" }),
       },
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
-    });
+    };
+    if (options.signal) init.signal = options.signal;
+    if (options.body !== undefined) init.body = JSON.stringify(options.body);
+    response = await fetch(url, init);
   } catch (cause) {
     if (cause instanceof DOMException && cause.name === "AbortError") throw cause;
     // fetch rejects the same way for offline, DNS failure, timeout and a
