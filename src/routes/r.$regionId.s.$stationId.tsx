@@ -357,7 +357,7 @@ function OutlookContent({
           body={strings.outlook.noneForStationWhy}
         />
       )}
-      {view.isPartialOrUnavailable && (
+      {view.isCurrent && view.isPartialOrUnavailable && (
         <p className={`${typography.body} ${surface.muted}`}>
           {strings.outlook.partialDaysNote}
         </p>
