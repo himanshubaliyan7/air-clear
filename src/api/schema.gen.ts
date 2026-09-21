@@ -290,6 +290,13 @@ export interface components {
             pollutant: string;
             /** Timezone */
             timezone?: string | null;
+            /** Forecast Made At */
+            forecast_made_at?: string | null;
+            /**
+             * Is Current
+             * @default false
+             */
+            is_current: boolean;
             /** Days */
             days: components["schemas"]["ExceedanceDayOut"][];
             /** Overall Recommendation */
