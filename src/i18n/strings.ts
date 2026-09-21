@@ -90,9 +90,9 @@ export const strings = {
     noneForStationWhy:
       "An outlook needs hourly history that most stations do not have. This is normal.",
     noCurrentForecast: "No current outlook.",
-    lastForecastWas: (when: string) => `The last one was made ${when}.`,
+    lastForecastWas: (when: string) => `The last one was ${when}.`,
     neverForecast: "No outlook has ever been made for this station.",
-    madeAt: (when: string) => `Forecast made ${when}.`,
+    madeAt: (when: string) => `Forecast ${when}.`,
     staleDaysNote:
       "The days below come from that older forecast run and are for information only.",
     partialDaysNote:
