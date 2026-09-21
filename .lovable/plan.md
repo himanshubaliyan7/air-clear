@@ -8,7 +8,9 @@ The working copy already matches the merged main: the committed contract at `doc
 
 ## What Phase 1 delivers
 
-**Station list for the region.** One call to the stations endpoint filtered by the region, cached five minutes, no per-station calls at all. Each station shows its name, its city, and two plain markers read straight from the list response: whether it has a current reading and whether it has an outlook. A station with neither is still browsable, and is never described with any safe/positive wording.
+**Station list for the region.** One call to the stations endpoint filtered by the region, cached five minutes, no per-station calls at all. The station name is the primary line; the city sits under it as secondary text. Each row also carries two availability markers read straight from the list response.
+
+**Availability markers.** Always written out in words, in both directions: "Current reading available" or "No current reading", and "Outlook available" or "No outlook". Neutral styling only — no colour-coded meaning, no ticks, no thumbs-up, nothing green. They state what data exists, never whether the air is safe. A station with neither marker is still browsable and never described with safe or positive wording.
 
 **Coverage counts.** Above the list: how many of the region's stations have a current reading and how many have an outlook, plus the short explanation that an outlook needs hourly history most stations do not have.
 
