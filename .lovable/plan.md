@@ -52,3 +52,11 @@ Separate operator-only page listing model-health rows, filterable by station and
 - Calls are made from the browser, so the API must allow the app's origin via CORS. If it doesn't, I'll flag it rather than proxying, since no backend work is in scope.
 - Day boundaries and all timestamps are formatted with `Intl` in the region's IANA zone; the browser zone is never used as a fallback for forecast days.
 - Category ids are looked up against the region's ordered list; an unknown id renders as a readable version of the id instead of failing.
+
+## Additions you requested
+
+- **Tests (Vitest).** Unit tests covering: the recommendation mapping, asserting `no-data` and any unknown value never map to a "go" or otherwise positive state; time formatting, asserting a UTC timestamp shortly before midnight renders as the next calendar day in `Asia/Kolkata`; and the unknown-category fallback rendering a readable id instead of failing.
+- **`npm run gen:api`.** A committed copy of the spec at `docs/openapi.json` plus a script that regenerates `src/api/schema.gen.ts` from it. The generated file carries a header comment saying it is generated and that the script must be re-run whenever the spec changes.
+- **HTTPS and connection failures.** The preview is served over HTTPS, so the API must be too — an insecure base URL is blocked by the browser. Network failure, a blocked cross-origin request and a blocked insecure request each surface as an explicit, named error state with a retry, never a blank screen.
+
+With no live API yet, the region redirect will land on that error state. That is the expected Phase 0 result and proves the error path works.
