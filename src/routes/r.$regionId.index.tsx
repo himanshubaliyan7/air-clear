@@ -52,14 +52,14 @@ export const Route = createFileRoute("/r/$regionId/")({
 
 function StationList() {
   const { regionId } = Route.useParams();
-  const { q } = Route.useSearch();
+  const { q = "" } = Route.useSearch();
   const navigate = Route.useNavigate();
   const { region } = useRegion();
   const { data, isPending, error, refetch } = useQuery(stationsQuery(regionId));
 
   const setQuery = (value: string) =>
     void navigate({
-      search: (prev) => ({ ...prev, q: value }),
+      search: (prev) => ({ ...prev, q: value === "" ? undefined : value }),
       replace: true,
     });
 
