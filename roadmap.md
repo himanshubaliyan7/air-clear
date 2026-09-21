@@ -18,10 +18,12 @@ Each phase stops for review. See `.lovable/plan/` for the approved plan.
 - [x] Vitest tests: recommendation mapping, region-zone time formatting, unknown-category fallback
 - [x] `npm run gen:api`
 
-## Phase 1 — Region and station selection
-- [ ] Region switcher (hidden with one region)
-- [ ] Station list with search, forecast-first ordering, coverage counts
-- [ ] Region / station / pollutant persisted in URL params
+## Phase 1 — Region and station selection (done)
+- [x] Region switcher (hidden with one region)
+- [x] Station list with search, forecast-first ordering, coverage counts
+- [x] Neutral text availability markers, both directions, never colour-only
+- [x] Region / station / pollutant persisted in URL params (no pollutant control yet)
+- [x] Phase 1 station placeholder page (identity only, no readings or outlook)
 
 ## Phase 2 — Station overview
 - [ ] Section A: current reading, per-pollutant sub-index table, attribution, all null/stale states
