@@ -47,6 +47,19 @@ describe("time formatting in the region's zone", () => {
     expect(formatAsOf("not-a-date", KOLKATA)).toBe("time unknown");
     expect(formatRelativeAge(null)).toBeNull();
   });
+
+  it("falls back safely when the browser exposes a non-BCP-47 locale", () => {
+    const original = globalThis.navigator;
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: { language: "en-US@posix" },
+    });
+    expect(formatAsOf("2026-09-21T23:00:00Z", KOLKATA)).toContain("2026");
+    Object.defineProperty(globalThis, "navigator", {
+      configurable: true,
+      value: original,
+    });
+  });
 });
 
 describe("formatCalendarDate", () => {
