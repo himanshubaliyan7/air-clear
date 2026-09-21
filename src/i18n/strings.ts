@@ -78,6 +78,9 @@ export const strings = {
       "These are index values over roughly the last day, not concentrations.",
     spreadLabel: "Range over the window",
     driverLabel: "Driven by",
+    pollutantLabel: "Pollutant",
+    averageLabel: "Average sub-index",
+    categoryLabel: "Category",
   },
 
   outlook: {
@@ -93,6 +96,9 @@ export const strings = {
     dayCategory: "Category",
     dayProbability: "Chance of exceeding",
     dayWorstCase: "Worst case (upper bound)",
+    pollutantLabel: "Outlook pollutant",
+    noPollutants:
+      "No outlook pollutant is configured for this region, so an outlook cannot be loaded.",
   },
 
   recommendation: {

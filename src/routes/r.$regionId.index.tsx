@@ -76,10 +76,7 @@ function StationList() {
 
       {data && coverage && (
         <>
-          <p
-            aria-live="polite"
-            className={`${typography.body} ${surface.muted}`}
-          >
+          <p className={`${typography.body} ${surface.muted}`}>
             {strings.stations.coverage(
               coverage.withReading,
               coverage.total,
@@ -145,7 +142,7 @@ function StationList() {
 
           {visible.length > 0 && (
             <>
-              <p aria-live="polite" className={`${typography.small} ${surface.muted}`}>
+              <p className={`${typography.small} ${surface.muted}`}>
                 {strings.stations.resultCount(visible.length, coverage.total)}
               </p>
               <ul className="space-y-2">
@@ -167,6 +164,7 @@ function StationList() {
                       </span>
                       <span
                         className="mt-2 flex flex-wrap gap-2"
+                        role="group"
                         aria-label={strings.stations.availabilityLabel}
                       >
                         <AvailabilityMarker

@@ -48,3 +48,12 @@ Supplied by `pollutant_details[].health_threshold_concentration` (with
 - **Which screen:** any station screen reached directly by URL.
 - **Why:** with a null `region_id` there is no time zone, category list or standard to
   render the station's data against.
+
+## 5. Forecast age/currentness on the exceedance response
+
+- **What we need:** `forecast_made_at` and `is_current` on
+  `/forecast/{station_id}/exceedance`, matching the forecast-series response.
+- **Which screen:** Phase 2 station outlook.
+- **Why:** the station overview intentionally uses only the exceedance summary, which
+  currently provides recommendation days but no timestamp or current/stale signal.
+  The frontend will not invent an age or infer currentness from the returned dates.
