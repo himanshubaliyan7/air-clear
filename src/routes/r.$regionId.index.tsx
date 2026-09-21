@@ -14,18 +14,21 @@ import { coverageCounts, filterStations, sortStations } from "@/lib/stations";
  * contract. Anything unparseable degrades to the default rather than erroring.
  */
 interface StationSearch {
-  q: string;
-  pollutant?: string;
+  q?: string | undefined;
+  pollutant?: string | undefined;
 }
 
 export const Route = createFileRoute("/r/$regionId/")({
-  validateSearch: (search: Record<string, unknown>): StationSearch => ({
-    q: typeof search["q"] === "string" ? search["q"] : "",
-    pollutant:
-      typeof search["pollutant"] === "string" && search["pollutant"]
-        ? search["pollutant"]
-        : undefined,
-  }),
+  validateSearch: (search: Record<string, unknown>): StationSearch => {
+    const result: StationSearch = {};
+    if (typeof search["q"] === "string" && search["q"] !== "") {
+      result.q = search["q"];
+    }
+    if (typeof search["pollutant"] === "string" && search["pollutant"] !== "") {
+      result.pollutant = search["pollutant"];
+    }
+    return result;
+  },
   head: () => ({
     meta: [
       { title: `Stations — ${strings.app.name}` },
