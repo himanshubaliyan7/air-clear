@@ -12,7 +12,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "gen:api": "openapi-typescript docs/openapi.json -o src/api/schema.gen.ts"
+    "gen:api": "node scripts/gen-api.mjs"
   },
   "overrides": {
     "rolldown": "1.2.1"
