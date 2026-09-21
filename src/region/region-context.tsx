@@ -59,7 +59,7 @@ export function RegionProvider({
       describeCategory: (id) => describeCategory(id, categories),
       formatAsOf: (iso) => formatAsOf(iso, timeZone),
       formatDateTime: (iso) => formatDateTimeInZone(iso, timeZone),
-      formatDay: (day) => formatCalendarDate(day, timeZone),
+      formatDay: (day) => formatCalendarDate(day),
     };
   }, [region, allRegions]);
 

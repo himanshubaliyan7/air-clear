@@ -58,16 +58,19 @@ export function calendarDayInZone(
   }).format(date);
 }
 
-/** A calendar date string (YYYY-MM-DD) rendered for reading, without shifting zones. */
-export function formatCalendarDate(
-  day: string | null | undefined,
-  timeZone: string,
-): string | null {
+/**
+ * A calendar date string (YYYY-MM-DD) rendered for reading.
+ *
+ * The input already IS a calendar day in the region's zone (the API bucketed it), so it
+ * is formatted in UTC, purely to print it. Formatting "noon UTC" in the region's zone
+ * would push zones at UTC+12 or later (Auckland, Fiji, Kiritimati) onto the next day.
+ */
+export function formatCalendarDate(day: string | null | undefined): string | null {
   if (!day) return null;
   const date = new Date(`${day}T12:00:00Z`);
   if (Number.isNaN(date.getTime())) return null;
   return new Intl.DateTimeFormat(locale(), {
-    timeZone,
+    timeZone: "UTC",
     weekday: "short",
     month: "short",
     day: "numeric",

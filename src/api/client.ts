@@ -49,6 +49,22 @@ export function getApiBaseUrl(): string {
  * blocked by the browser as mixed content. Detect it up front and report it as its
  * own error kind rather than letting it surface as an opaque network failure.
  */
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+/**
+ * http:// is blocked from an https page as mixed content, except for loopback
+ * addresses, which browsers treat as secure. That exception is what lets a developer
+ * test against an API running on their own machine.
+ */
+export function isInsecureBaseUrl(baseUrl: string, pageIsSecure: boolean): boolean {
+  if (!pageIsSecure || !baseUrl.startsWith("http://")) return false;
+  try {
+    return !LOOPBACK_HOSTS.has(new URL(baseUrl).hostname);
+  } catch {
+    return true;
+  }
+}
+
 function assertUsableBaseUrl(baseUrl: string): void {
   if (!baseUrl) {
     throw new ApiError(
@@ -58,7 +74,7 @@ function assertUsableBaseUrl(baseUrl: string): void {
   }
   const pageIsSecure =
     typeof window !== "undefined" && window.location.protocol === "https:";
-  if (pageIsSecure && baseUrl.startsWith("http://")) {
+  if (isInsecureBaseUrl(baseUrl, pageIsSecure)) {
     throw new ApiError(
       "insecure",
       `${API_BASE_URL_ENV_NAME} uses http:// while the app is served over https://.`,
@@ -121,6 +137,9 @@ export async function apiGet<T>(
   return request<T>("GET", path, options);
 }
 
+/** A request that has not finished after this long is reported as a network failure. */
+export const REQUEST_TIMEOUT_MS = 20_000;
+
 export async function request<T>(
   method: string,
   path: string,
@@ -132,57 +151,92 @@ export async function request<T>(
 ): Promise<T> {
   const url = buildUrl(path, options.query);
 
-  let response: Response;
+  // One controller covers both the caller's cancellation and our own timeout, so a
+  // stalled connection can never leave a screen loading forever.
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+  const onCallerAbort = () => controller.abort();
+  if (options.signal) {
+    if (options.signal.aborted) controller.abort();
+    else options.signal.addEventListener("abort", onCallerAbort, { once: true });
+  }
+
   try {
-    const init: RequestInit = {
-      method,
-      headers: {
-        Accept: "application/json",
-        ...(options.body === undefined
-          ? {}
-          : { "Content-Type": "application/json" }),
-      },
-    };
-    if (options.signal) init.signal = options.signal;
-    if (options.body !== undefined) init.body = JSON.stringify(options.body);
-    response = await fetch(url, init);
-  } catch (cause) {
-    if (cause instanceof DOMException && cause.name === "AbortError") throw cause;
-    // fetch rejects the same way for offline, DNS failure, timeout and a
-    // cross-origin request the API did not allow. The message covers all of them.
+    let response: Response;
+    try {
+      const init: RequestInit = {
+        method,
+        headers: {
+          Accept: "application/json",
+          ...(options.body === undefined
+            ? {}
+            : { "Content-Type": "application/json" }),
+        },
+        signal: controller.signal,
+      };
+      if (options.body !== undefined) init.body = JSON.stringify(options.body);
+      response = await fetch(url, init);
+    } catch (cause) {
+      if (
+        !timedOut &&
+        cause instanceof DOMException &&
+        cause.name === "AbortError"
+      ) {
+        throw cause; // cancelled by the caller (e.g. the user navigated away)
+      }
+      // fetch rejects the same way for offline, DNS failure, a timeout and a
+      // cross-origin request the API did not allow. The message covers all of them.
+      throw new ApiError(
+        "network",
+        timedOut
+          ? "The air-quality service did not respond in time."
+          : "Could not reach the air-quality service.",
+      );
+    }
+
+    if (response.ok) {
+      if (response.status === 204) return undefined as T;
+      try {
+        return (await response.json()) as T;
+      } catch {
+        throw new ApiError(
+          "server",
+          "The air-quality service returned a response that could not be read.",
+          response.status,
+        );
+      }
+    }
+
+    let body: unknown = null;
+    try {
+      body = await response.json();
+    } catch {
+      body = null;
+    }
+
+    if (response.status === 404) {
+      throw new ApiError("not-found", firstMessage(body, {}, "Not found."), 404);
+    }
+    if (response.status === 422) {
+      const fieldErrors = collectFieldErrors(body);
+      throw new ApiError(
+        "validation",
+        firstMessage(body, fieldErrors, "Some of the details were not valid."),
+        422,
+        fieldErrors,
+      );
+    }
     throw new ApiError(
-      "network",
-      "Could not reach the air-quality service.",
+      "server",
+      firstMessage(body, {}, "The air-quality service returned an error."),
+      response.status,
     );
+  } finally {
+    clearTimeout(timer);
+    options.signal?.removeEventListener("abort", onCallerAbort);
   }
-
-  if (response.ok) {
-    if (response.status === 204) return undefined as T;
-    return (await response.json()) as T;
-  }
-
-  let body: unknown = null;
-  try {
-    body = await response.json();
-  } catch {
-    body = null;
-  }
-
-  if (response.status === 404) {
-    throw new ApiError("not-found", firstMessage(body, {}, "Not found."), 404);
-  }
-  if (response.status === 422) {
-    const fieldErrors = collectFieldErrors(body);
-    throw new ApiError(
-      "validation",
-      firstMessage(body, fieldErrors, "Some of the details were not valid."),
-      422,
-      fieldErrors,
-    );
-  }
-  throw new ApiError(
-    "server",
-    firstMessage(body, {}, "The air-quality service returned an error."),
-    response.status,
-  );
 }
