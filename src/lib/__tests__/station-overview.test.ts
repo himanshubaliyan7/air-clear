@@ -27,6 +27,8 @@ function outlook(partial: Partial<ExceedanceSummary> = {}): ExceedanceSummary {
     pollutant: "pm25",
     timezone: "Asia/Kolkata",
     days: [],
+    forecast_made_at: "2026-09-21T06:00:00Z",
+    is_current: true,
     overall_recommendation: "no-data",
     ...partial,
   };
