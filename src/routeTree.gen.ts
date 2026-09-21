@@ -10,33 +10,51 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RRegionIdRouteImport } from './routes/r.$regionId'
+import { Route as RRegionIdIndexRouteImport } from './routes/r.$regionId.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RRegionIdRoute = RRegionIdRouteImport.update({
+  id: '/r/$regionId',
+  path: '/r/$regionId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RRegionIdIndexRoute = RRegionIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RRegionIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/r/$regionId': typeof RRegionIdRouteWithChildren
+  '/r/$regionId/': typeof RRegionIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/r/$regionId': typeof RRegionIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/r/$regionId': typeof RRegionIdRouteWithChildren
+  '/r/$regionId/': typeof RRegionIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/r/$regionId' | '/r/$regionId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/r/$regionId'
+  id: '__root__' | '/' | '/r/$regionId' | '/r/$regionId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  RRegionIdRoute: typeof RRegionIdRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +66,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/r/$regionId': {
+      id: '/r/$regionId'
+      path: '/r/$regionId'
+      fullPath: '/r/$regionId'
+      preLoaderRoute: typeof RRegionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/r/$regionId/': {
+      id: '/r/$regionId/'
+      path: '/'
+      fullPath: '/r/$regionId/'
+      preLoaderRoute: typeof RRegionIdIndexRouteImport
+      parentRoute: typeof RRegionIdRoute
+    }
   }
 }
 
+interface RRegionIdRouteChildren {
+  RRegionIdIndexRoute: typeof RRegionIdIndexRoute
+}
+
+const RRegionIdRouteChildren: RRegionIdRouteChildren = {
+  RRegionIdIndexRoute: RRegionIdIndexRoute,
+}
+
+const RRegionIdRouteWithChildren = RRegionIdRoute._addFileChildren(
+  RRegionIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  RRegionIdRoute: RRegionIdRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
