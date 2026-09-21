@@ -237,7 +237,9 @@ function CurrentReadingContent({
       {reading.overall ? (
         <dl className="mt-3 grid gap-2 sm:grid-cols-2">
           <div>
-            <dt className={`${typography.small} ${surface.muted}`}>AQI</dt>
+            <dt className={`${typography.small} ${surface.muted}`}>
+              {strings.current.overallLabel}
+            </dt>
             <dd className={typography.sectionTitle}>{formatNumber(reading.overall.aqi)}</dd>
           </div>
           <div>

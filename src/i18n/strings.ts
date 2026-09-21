@@ -78,6 +78,7 @@ export const strings = {
       "These are index values over roughly the last day, not concentrations.",
     spreadLabel: "Range over the window",
     driverLabel: "Driven by",
+    overallLabel: "Air quality index",
     pollutantLabel: "Pollutant",
     averageLabel: "Average sub-index",
     categoryLabel: "Category",
