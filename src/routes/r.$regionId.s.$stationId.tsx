@@ -24,6 +24,7 @@ import {
   currentThresholdMessage,
   describeOutlook,
 } from "@/lib/station-overview";
+import type { CurrentAqi, ExceedanceSummary } from "@/api/types";
 
 interface StationOverviewSearch {
   pollutant?: string | undefined;
@@ -172,18 +173,19 @@ function StationOverview() {
   );
 }
 
-type CurrentQuery = ReturnType<typeof useQuery<ReturnType<typeof currentAqiQuery>>>;
-
 function CurrentReadingSection({
   query,
   regionContext,
 }: {
-  query: ReturnType<typeof useQuery>;
+  query: {
+    data: CurrentAqi | undefined;
+    isPending: boolean;
+    error: Error | null;
+    refetch: () => Promise<unknown>;
+  };
   regionContext: ReturnType<typeof useRegion>;
 }) {
-  const reading = query.data as Awaited<
-    ReturnType<ReturnType<typeof currentAqiQuery>["queryFn"]>
-  > | undefined;
+  const reading = query.data;
 
   return (
     <section aria-labelledby="current-heading" className={surface.section}>
@@ -205,7 +207,7 @@ function CurrentReadingContent({
   reading,
   regionContext,
 }: {
-  reading: import("@/api/types").CurrentAqi;
+  reading: CurrentAqi;
   regionContext: ReturnType<typeof useRegion>;
 }) {
   const state = currentReadingState(reading);
@@ -313,7 +315,7 @@ function OutlookContent({
   data,
   regionContext,
 }: {
-  data: import("@/api/types").ExceedanceSummary;
+  data: ExceedanceSummary;
   regionContext: ReturnType<typeof useRegion>;
 }) {
   const view = describeOutlook(data);
