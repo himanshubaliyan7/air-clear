@@ -27,6 +27,8 @@ function outlook(partial: Partial<ExceedanceSummary> = {}): ExceedanceSummary {
     pollutant: "pm25",
     timezone: "Asia/Kolkata",
     days: [],
+    forecast_made_at: "2026-09-21T06:00:00Z",
+    is_current: true,
     overall_recommendation: "no-data",
     ...partial,
   };
@@ -83,5 +85,26 @@ describe("outlook presentation", () => {
     const view = describeOutlook(outlook({ overall_recommendation: "all-clear" }));
     expect(view.recommendation.value).toBe("no-data");
     expect(view.recommendation.isPositive).toBe(false);
+  });
+});
+describe("outlook currentness", () => {
+  it("treats a non-current outlook with a timestamp as stale", () => {
+    const view = describeOutlook(outlook({ is_current: false }));
+    expect(view.state).toBe("stale");
+    expect(view.isCurrent).toBe(false);
+  });
+
+  it("treats a non-current outlook without a timestamp as never made", () => {
+    const view = describeOutlook(
+      outlook({ is_current: false, forecast_made_at: null }),
+    );
+    expect(view.state).toBe("never");
+  });
+
+  it("never reports a stale outlook as positive, even with a go recommendation", () => {
+    const view = describeOutlook(
+      outlook({ is_current: false, overall_recommendation: "go" }),
+    );
+    expect(view.isCurrent).toBe(false);
   });
 });
