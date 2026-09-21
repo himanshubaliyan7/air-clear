@@ -5,7 +5,11 @@ Nothing here is faked or worked around in the app.
 
 ---
 
-## 1. Concentration unit for forecast and history values
+## 1. Concentration unit for forecast and history values — RESOLVED
+
+Supplied by `pollutant_details[].unit` on the region (added to the contract after
+Phase 0). To be wired in at Phase 3, where the values are first rendered.
+
 
 - **What we need:** the unit for `point_forecast`, `quantile_low`, `quantile_high`,
   `worst_case_value` and `actual` / `forecast_value` — ideally per pollutant, on the
@@ -16,7 +20,11 @@ Nothing here is faked or worked around in the app.
   unit differs by pollutant and standard. We will not guess one. Until it exists,
   values are rendered unlabelled (`src/lib/pollutants.ts`).
 
-## 2. Threshold concentration for the region's health-threshold category
+## 2. Threshold concentration for the health-threshold category — RESOLVED
+
+Supplied by `pollutant_details[].health_threshold_concentration` (with
+`threshold_averaging`) on the region. The Phase 3 chart can draw the line from it.
+
 
 - **What we need:** the concentration value, per pollutant, at which the region's
   `health_threshold_category` begins.

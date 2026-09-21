@@ -118,14 +118,30 @@ export const strings = {
   stations: {
     listTitle: "Stations",
     searchLabel: "Search stations by name",
+    searchPlaceholder: "Station name",
+    searchHint: "The station's city is matched too.",
+    clearSearch: "Clear search",
     coverage: (withReading: number, total: number, withForecast: number) =>
       `${withReading} of ${total} stations have a current reading; ${withForecast} have an outlook.`,
     coverageWhy:
       "An outlook needs hourly history that most stations do not have.",
-    hasCurrentReading: "Current reading",
-    hasOutlook: "Outlook",
+    /** Availability markers. Written out in both directions, never colour-only. */
+    hasCurrentReading: "Current reading available",
+    noCurrentReading: "No current reading",
+    hasOutlook: "Outlook available",
+    noOutlook: "No outlook",
+    availabilityLabel: "Data availability",
+    resultCount: (shown: number, total: number) =>
+      `Showing ${shown} of ${total} stations.`,
     noneTitle: "No stations",
     noneBody: "No stations are listed for this region.",
+    noMatchTitle: "No stations match",
+    noMatchBody: "No station in this region matches that search.",
+    unknownTitle: "Unknown station",
+    unknownBody: "This station is not listed for this region.",
+    backToList: "Back to all stations",
+    detailComing:
+      "The current reading and outlook for this station are not shown yet.",
   },
 
   modelHealth: {
