@@ -21,3 +21,5 @@ export type History = components["schemas"]["HistoryOut"];
 export type HistoryPoint = components["schemas"]["HistoryPointOut"];
 export type ModelHealth = components["schemas"]["ModelHealthOut"];
 export type ValidationErrorItem = components["schemas"]["ValidationError"];
+export type Attribution = components["schemas"]["AttributionOut"];
+export type PollutantInfo = components["schemas"]["PollutantInfoOut"];

@@ -5,6 +5,7 @@
 import { apiGet, encodePathSegment, request } from "./client";
 
 import type {
+  Attribution,
   CurrentAqi,
   ExceedanceSummary,
   ForecastSeries,
@@ -85,6 +86,10 @@ export function listModelHealth(
 
 export function getServiceHealth(signal?: AbortSignal) {
   return apiGet<unknown>("/health", { signal });
+}
+
+export function listAttributions(signal?: AbortSignal) {
+  return apiGet<Attribution[]>("/attributions", { signal });
 }
 
 export { request };

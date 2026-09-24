@@ -155,6 +155,59 @@ export const strings = {
       "The current reading and outlook for this station are not shown yet.",
   },
 
+  chart: {
+    roleDescription: "chart",
+    keyboardHint: "Focus the chart and use the arrow keys to step through times.",
+    showTable: "Show as table",
+    hideTable: "Hide table",
+    noValue: "no value",
+    noValueShort: "—",
+  },
+
+  forecastDetail: {
+    linkLabel: "Forecast detail",
+    pageTitle: "Forecast detail",
+    backToOverview: "Back to station overview",
+    pollutantLabel: "Pollutant",
+    unavailableTitle: "Forecast detail is not available",
+    unavailableBody:
+      "This station has no current forecast, so there is no forecast detail to show.",
+    forecastTitle: "Forecast",
+    forecastSummary: (n: number, unit: string) =>
+      `Expected value with its likely low-to-high range for ${n} forecast times, in ${unit}.`,
+    expected: "Expected value",
+    range: "Likely range (low to high)",
+    low: "Low",
+    high: "High",
+    horizon: "Hours ahead",
+    time: "Time",
+    noForecastPoints: "The forecast returned no times.",
+    thresholdLabel: (value: string, averaging: string | null) =>
+      averaging ? `Health threshold: ${value} (${averaging})` : `Health threshold: ${value}`,
+    noThreshold:
+      "The service has not supplied a health-threshold concentration for this pollutant, so no threshold line is drawn.",
+    unitLabel: (unit: string) => `Concentration (${unit})`,
+    noUnit:
+      "The service has not supplied a unit for this pollutant, so values are shown without one.",
+    unlabelledAxis: "Concentration",
+    unitUnknown: "an unstated unit",
+    timesIn: (zone: string) => `Times are shown in ${zone}.`,
+    historyTitle: "Past forecasts compared with measurements",
+    historySummary: (days: number, unit: string) =>
+      `Measured values and what was forecast over the last ${days} days, in ${unit}. Gaps mean no value.`,
+    actual: "Measured",
+    forecastValue: "Forecast",
+    lookbackLabel: "Period",
+    lookbackOption: (days: number) => `Last ${days} days`,
+    noHistoryPoints: "No history was returned for this period.",
+    tableCaptionForecast: "Forecast values",
+    tableCaptionHistory: "Measured and forecast values",
+  },
+
+  attributions: {
+    label: "Data credits",
+  },
+
   modelHealth: {
     title: "Model health",
     operatorOnly: "Operator view. Not intended for school users.",

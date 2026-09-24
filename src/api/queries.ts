@@ -96,3 +96,11 @@ export const modelHealthQuery = (
     queryFn: ({ signal }) => api.listModelHealth(params, signal),
     ...shared,
   });
+
+export const attributionsQuery = () =>
+  queryOptions({
+    queryKey: ["attributions"] as const,
+    queryFn: ({ signal }) => api.listAttributions(signal),
+    ...shared,
+    refetchInterval: false as const,
+  });
