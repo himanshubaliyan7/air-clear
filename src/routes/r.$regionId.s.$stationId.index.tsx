@@ -134,6 +134,16 @@ function StationOverview() {
             <h2 id="outlook-heading" className={typography.sectionTitle}>
               {strings.outlook.sectionTitle}
             </h2>
+            {station.has_current_forecast === true && (
+              <Link
+                to="/r/$regionId/s/$stationId/forecast"
+                params={{ regionId, stationId }}
+                search={pollutant ? { pollutant } : {}}
+                className={control.button}
+              >
+                {strings.forecastDetail.linkLabel}
+              </Link>
+            )}
 
             {pollutants.length > 0 ? (
               <label className="block max-w-xs">
