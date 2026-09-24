@@ -30,7 +30,7 @@ interface StationOverviewSearch {
   pollutant?: string | undefined;
 }
 
-export const Route = createFileRoute("/r/$regionId/s/$stationId")({
+export const Route = createFileRoute("/r/$regionId/s/$stationId/")({
   validateSearch: (search: Record<string, unknown>): StationOverviewSearch => {
     const result: StationOverviewSearch = {};
     if (typeof search["pollutant"] === "string" && search["pollutant"] !== "") {
