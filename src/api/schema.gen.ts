@@ -46,6 +46,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/attributions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Attributions
+         * @description Data credits to display (e.g. in a page footer) on every screen. Required ones are
+         *     a licence condition; the current-aqi response also carries the CPCB text next to the
+         *     readings it covers.
+         */
+        get: operations["list_attributions_api_v1_attributions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/stations/{station_id}/current-aqi": {
         parameters: {
             query?: never;
@@ -245,6 +267,19 @@ export interface components {
             id: string;
             /** Label */
             label: string;
+        };
+        /** AttributionOut */
+        AttributionOut: {
+            /** Id */
+            id: string;
+            /** Text */
+            text: string;
+            /** Url */
+            url: string | null;
+            /** Required */
+            required: boolean;
+            /** Applies To */
+            applies_to: string;
         };
         /** CurrentAqiOut */
         CurrentAqiOut: {
@@ -602,6 +637,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_attributions_api_v1_attributions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttributionOut"][];
                 };
             };
         };
