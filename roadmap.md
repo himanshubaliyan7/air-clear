@@ -39,4 +39,4 @@ Each phase stops for review. See `.lovable/plan/` for the approved plan.
 - [ ] ON HOLD — blocked on the revised backend contract from the user
 
 ## Phase 5 — Operator model-health page
-- [ ] Filterable model-health table, nulls as "n/a", unlinked from school navigation
+- [x] Filterable model-health table, nulls as "n/a", unlinked from school navigation
