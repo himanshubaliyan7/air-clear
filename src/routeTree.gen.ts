@@ -14,6 +14,7 @@ import { Route as RRegionIdRouteImport } from './routes/r.$regionId'
 import { Route as RRegionIdIndexRouteImport } from './routes/r.$regionId.index'
 import { Route as RRegionIdSStationIdRouteImport } from './routes/r.$regionId.s.$stationId'
 import { Route as RRegionIdSStationIdIndexRouteImport } from './routes/r.$regionId.s.$stationId.index'
+import { Route as RRegionIdSStationIdForecastRouteImport } from './routes/r.$regionId.s.$stationId.forecast'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -41,17 +42,25 @@ const RRegionIdSStationIdIndexRoute =
     path: '/',
     getParentRoute: () => RRegionIdSStationIdRoute,
   } as any)
+const RRegionIdSStationIdForecastRoute =
+  RRegionIdSStationIdForecastRouteImport.update({
+    id: '/forecast',
+    path: '/forecast',
+    getParentRoute: () => RRegionIdSStationIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/r/$regionId': typeof RRegionIdRouteWithChildren
   '/r/$regionId/': typeof RRegionIdIndexRoute
   '/r/$regionId/s/$stationId': typeof RRegionIdSStationIdRouteWithChildren
+  '/r/$regionId/s/$stationId/forecast': typeof RRegionIdSStationIdForecastRoute
   '/r/$regionId/s/$stationId/': typeof RRegionIdSStationIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/r/$regionId': typeof RRegionIdIndexRoute
+  '/r/$regionId/s/$stationId/forecast': typeof RRegionIdSStationIdForecastRoute
   '/r/$regionId/s/$stationId': typeof RRegionIdSStationIdIndexRoute
 }
 export interface FileRoutesById {
@@ -60,6 +69,7 @@ export interface FileRoutesById {
   '/r/$regionId': typeof RRegionIdRouteWithChildren
   '/r/$regionId/': typeof RRegionIdIndexRoute
   '/r/$regionId/s/$stationId': typeof RRegionIdSStationIdRouteWithChildren
+  '/r/$regionId/s/$stationId/forecast': typeof RRegionIdSStationIdForecastRoute
   '/r/$regionId/s/$stationId/': typeof RRegionIdSStationIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -69,15 +79,21 @@ export interface FileRouteTypes {
     | '/r/$regionId'
     | '/r/$regionId/'
     | '/r/$regionId/s/$stationId'
+    | '/r/$regionId/s/$stationId/forecast'
     | '/r/$regionId/s/$stationId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/r/$regionId' | '/r/$regionId/s/$stationId'
+  to:
+    | '/'
+    | '/r/$regionId'
+    | '/r/$regionId/s/$stationId/forecast'
+    | '/r/$regionId/s/$stationId'
   id:
     | '__root__'
     | '/'
     | '/r/$regionId'
     | '/r/$regionId/'
     | '/r/$regionId/s/$stationId'
+    | '/r/$regionId/s/$stationId/forecast'
     | '/r/$regionId/s/$stationId/'
   fileRoutesById: FileRoutesById
 }
@@ -123,14 +139,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RRegionIdSStationIdIndexRouteImport
       parentRoute: typeof RRegionIdSStationIdRoute
     }
+    '/r/$regionId/s/$stationId/forecast': {
+      id: '/r/$regionId/s/$stationId/forecast'
+      path: '/forecast'
+      fullPath: '/r/$regionId/s/$stationId/forecast'
+      preLoaderRoute: typeof RRegionIdSStationIdForecastRouteImport
+      parentRoute: typeof RRegionIdSStationIdRoute
+    }
   }
 }
 
 interface RRegionIdSStationIdRouteChildren {
+  RRegionIdSStationIdForecastRoute: typeof RRegionIdSStationIdForecastRoute
   RRegionIdSStationIdIndexRoute: typeof RRegionIdSStationIdIndexRoute
 }
 
 const RRegionIdSStationIdRouteChildren: RRegionIdSStationIdRouteChildren = {
+  RRegionIdSStationIdForecastRoute: RRegionIdSStationIdForecastRoute,
   RRegionIdSStationIdIndexRoute: RRegionIdSStationIdIndexRoute,
 }
 

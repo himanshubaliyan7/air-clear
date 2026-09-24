@@ -25,13 +25,15 @@ Each phase stops for review. See `.lovable/plan/` for the approved plan.
 - [x] Region / station / pollutant persisted in URL params (no pollutant control yet)
 - [x] Phase 1 station placeholder page (identity only, no readings or outlook)
 
-## Phase 2 — Station overview
+## Phase 2 — Station overview (done)
 - [x] Section A: current reading, per-pollutant sub-index table, attribution, all null/stale states
 - [x] Section B: outlook recommendation + per-day breakdown, all four values
 
-## Phase 3 — Forecast detail
-- [ ] Forecast series chart with low/high range + table alternative
-- [ ] History (actual vs forecast) with selectable lookback, gaps as gaps
+## Phase 3 — Forecast detail (done)
+- [x] Forecast series chart with low/high range + table alternative
+- [x] History (actual vs forecast) with selectable lookback, gaps as gaps
+- [x] Units + threshold line from pollutant_details; response timezones
+- [x] App-wide data credits footer from /attributions
 
 ## Phase 4 — Alert subscription
 - [ ] ON HOLD — blocked on the revised backend contract from the user
