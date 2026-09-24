@@ -165,8 +165,8 @@ export function TimeChart(props: TimeChartProps) {
               </text>
             </g>
           ))}
-          {layout.xTicks.map((t) => (
-            <text key={`x${t}`} x={layout.x(t)} y={HEIGHT - 10} textAnchor="middle" className={chart.tick}>
+          {layout.xTicks.map((t, i, arr) => (
+            <text key={`x${t}`} x={layout.x(t)} y={HEIGHT - 10} textAnchor={arr.length > 1 && i === arr.length - 1 ? "end" : i === 0 && arr.length > 1 ? "start" : "middle"} className={chart.tick}>
               {props.formatTick(t)}
             </text>
           ))}
