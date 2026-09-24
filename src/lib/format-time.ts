@@ -47,6 +47,18 @@ export function formatTimeInZone(
   }).format(date);
 }
 
+/** Compact axis label: short day and hour in the given zone. */
+export function formatTickInZone(ms: number, timeZone: string): string {
+  const date = new Date(ms);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat(locale(), {
+    timeZone,
+    day: "numeric",
+    month: "short",
+    hour: "numeric",
+  }).format(date);
+}
+
 /**
  * The calendar day an instant falls on inside the region's zone, as YYYY-MM-DD.
  * A UTC instant late in the evening can belong to the next day in an ahead-of-UTC

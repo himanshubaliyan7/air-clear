@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RRegionIdRouteImport } from './routes/r.$regionId'
 import { Route as RRegionIdIndexRouteImport } from './routes/r.$regionId.index'
+import { Route as RRegionIdSStationIdRouteImport } from './routes/r.$regionId.s.$stationId'
 import { Route as RRegionIdSStationIdIndexRouteImport } from './routes/r.$regionId.s.$stationId.index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,17 +30,23 @@ const RRegionIdIndexRoute = RRegionIdIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RRegionIdRoute,
 } as any)
+const RRegionIdSStationIdRoute = RRegionIdSStationIdRouteImport.update({
+  id: '/s/$stationId',
+  path: '/s/$stationId',
+  getParentRoute: () => RRegionIdRoute,
+} as any)
 const RRegionIdSStationIdIndexRoute =
   RRegionIdSStationIdIndexRouteImport.update({
-    id: '/s/$stationId/',
-    path: '/s/$stationId/',
-    getParentRoute: () => RRegionIdRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => RRegionIdSStationIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/r/$regionId': typeof RRegionIdRouteWithChildren
   '/r/$regionId/': typeof RRegionIdIndexRoute
+  '/r/$regionId/s/$stationId': typeof RRegionIdSStationIdRouteWithChildren
   '/r/$regionId/s/$stationId/': typeof RRegionIdSStationIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -52,12 +59,17 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/r/$regionId': typeof RRegionIdRouteWithChildren
   '/r/$regionId/': typeof RRegionIdIndexRoute
+  '/r/$regionId/s/$stationId': typeof RRegionIdSStationIdRouteWithChildren
   '/r/$regionId/s/$stationId/': typeof RRegionIdSStationIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/r/$regionId' | '/r/$regionId/' | '/r/$regionId/s/$stationId/'
+    | '/'
+    | '/r/$regionId'
+    | '/r/$regionId/'
+    | '/r/$regionId/s/$stationId'
+    | '/r/$regionId/s/$stationId/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/r/$regionId' | '/r/$regionId/s/$stationId'
   id:
@@ -65,6 +77,7 @@ export interface FileRouteTypes {
     | '/'
     | '/r/$regionId'
     | '/r/$regionId/'
+    | '/r/$regionId/s/$stationId'
     | '/r/$regionId/s/$stationId/'
   fileRoutesById: FileRoutesById
 }
@@ -96,24 +109,42 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RRegionIdIndexRouteImport
       parentRoute: typeof RRegionIdRoute
     }
+    '/r/$regionId/s/$stationId': {
+      id: '/r/$regionId/s/$stationId'
+      path: '/s/$stationId'
+      fullPath: '/r/$regionId/s/$stationId'
+      preLoaderRoute: typeof RRegionIdSStationIdRouteImport
+      parentRoute: typeof RRegionIdRoute
+    }
     '/r/$regionId/s/$stationId/': {
       id: '/r/$regionId/s/$stationId/'
-      path: '/s/$stationId'
+      path: '/'
       fullPath: '/r/$regionId/s/$stationId/'
       preLoaderRoute: typeof RRegionIdSStationIdIndexRouteImport
-      parentRoute: typeof RRegionIdRoute
+      parentRoute: typeof RRegionIdSStationIdRoute
     }
   }
 }
 
+interface RRegionIdSStationIdRouteChildren {
+  RRegionIdSStationIdIndexRoute: typeof RRegionIdSStationIdIndexRoute
+}
+
+const RRegionIdSStationIdRouteChildren: RRegionIdSStationIdRouteChildren = {
+  RRegionIdSStationIdIndexRoute: RRegionIdSStationIdIndexRoute,
+}
+
+const RRegionIdSStationIdRouteWithChildren =
+  RRegionIdSStationIdRoute._addFileChildren(RRegionIdSStationIdRouteChildren)
+
 interface RRegionIdRouteChildren {
   RRegionIdIndexRoute: typeof RRegionIdIndexRoute
-  RRegionIdSStationIdIndexRoute: typeof RRegionIdSStationIdIndexRoute
+  RRegionIdSStationIdRoute: typeof RRegionIdSStationIdRouteWithChildren
 }
 
 const RRegionIdRouteChildren: RRegionIdRouteChildren = {
   RRegionIdIndexRoute: RRegionIdIndexRoute,
-  RRegionIdSStationIdIndexRoute: RRegionIdSStationIdIndexRoute,
+  RRegionIdSStationIdRoute: RRegionIdSStationIdRouteWithChildren,
 }
 
 const RRegionIdRouteWithChildren = RRegionIdRoute._addFileChildren(
