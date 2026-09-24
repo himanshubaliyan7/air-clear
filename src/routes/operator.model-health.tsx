@@ -62,7 +62,7 @@ function ModelHealthPage() {
     const map = new Map<string, { name: string; timeZone: string }>();
     (regions.data ?? []).forEach((region, i) => {
       for (const s of stationQueries[i]?.data ?? []) {
-        map.set(s.id, { name: s.name, timeZone: region.timezone });
+        map.set(s.station_id, { name: s.name, timeZone: region.timezone });
       }
     });
     return map;
