@@ -206,24 +206,20 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Create Subscription
-         * @description Creates a subscription for a NEW email only.
-         *
-         *     Deliberately never modifies, reactivates or reveals an existing row: with
-         *     no proof of email ownership, an upsert would let anyone overwrite a
-         *     victim's stations and read back their subscriber_id (the only credential
-         *     for DELETE). A 409 is returned instead. Changing or re-enabling a
-         *     subscription needs an owner-verified flow (emailed confirmation token),
-         *     which is not built yet.
+         * Request Subscription
+         * @description Ask to subscribe. Always answers the same 202 body (no subscriber id, no
+         *     hint whether the address is already known). Emails a confirmation link for
+         *     a new/pending address, or a manage link for a confirmed one; nothing is
+         *     activated or modified until the mailbox owner uses a link.
          */
-        post: operations["create_subscription_api_v1_subscriptions_post"];
+        post: operations["request_subscription_api_v1_subscriptions_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/v1/subscriptions/{subscriber_id}": {
+    "/api/v1/subscriptions/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -232,9 +228,93 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
+        /**
+         * Confirm Subscription
+         * @description Single-use: the token is erased from the row the moment it works.
+         */
+        post: operations["confirm_subscription_api_v1_subscriptions_confirm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/manage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Manage Subscription
+         * @description Replace the stations/pollutants of a confirmed subscription (and switch
+         *     it on, which is how someone who unsubscribed re-subscribes). Authorised
+         *     only by the emailed manage token.
+         */
+        post: operations["manage_subscription_api_v1_subscriptions_manage_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/unsubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
         /** Unsubscribe */
-        delete: operations["unsubscribe_api_v1_subscriptions__subscriber_id__delete"];
+        post: operations["unsubscribe_api_v1_subscriptions_unsubscribe_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Delete Subscription
+         * @description Erase the subscription and its send history ("delete my data"). Same
+         *     tokens as unsubscribing. Irreversible; subscribing again starts over.
+         */
+        post: operations["delete_subscription_api_v1_subscriptions_delete_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/subscriptions/unsubscribe/one-click": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Unsubscribe One Click
+         * @description RFC 8058 target of the List-Unsubscribe header: the mail provider POSTs
+         *     `List-Unsubscribe=One-Click` (form-encoded) with no user interaction.
+         */
+        post: operations["unsubscribe_one_click_api_v1_subscriptions_unsubscribe_one_click_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -403,6 +483,15 @@ export interface components {
             /** Forecast Value */
             forecast_value: number | null;
         };
+        /** ManageIn */
+        ManageIn: {
+            /** Station Ids */
+            station_ids: string[];
+            /** Pollutants */
+            pollutants: components["schemas"]["Pollutant"][];
+            /** Token */
+            token: string;
+        };
         /** ModelHealthOut */
         ModelHealthOut: {
             /** Station Id */
@@ -548,25 +637,42 @@ export interface components {
         };
         /** SubscriptionIn */
         SubscriptionIn: {
+            /** Station Ids */
+            station_ids: string[];
+            /** Pollutants */
+            pollutants: components["schemas"]["Pollutant"][];
             /**
              * Email
              * Format: email
              */
             email: string;
-            /** Station Ids */
-            station_ids: string[];
-            /** Pollutants */
-            pollutants: components["schemas"]["Pollutant"][];
         };
-        /** SubscriptionOut */
-        SubscriptionOut: {
+        /**
+         * SubscriptionRequestOut
+         * @description Identical for every valid request, whatever the email's state, so the
+         *     endpoint cannot be used to test whether an address is subscribed.
+         */
+        SubscriptionRequestOut: {
             /**
-             * Subscriber Id
-             * Format: uuid
+             * Status
+             * @default check-your-email
              */
-            subscriber_id: string;
+            status: string;
+            /**
+             * Message
+             * @default If this address can be subscribed, an email with a link has been sent to it. Nothing changes until the owner of the address opens that link.
+             */
+            message: string;
+        };
+        /** SubscriptionStatusOut */
+        SubscriptionStatusOut: {
             /** Status */
             status: string;
+        };
+        /** TokenIn */
+        TokenIn: {
+            /** Token */
+            token: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -888,7 +994,7 @@ export interface operations {
             };
         };
     };
-    create_subscription_api_v1_subscriptions_post: {
+    request_subscription_api_v1_subscriptions_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -902,12 +1008,12 @@ export interface operations {
         };
         responses: {
             /** @description Successful Response */
-            200: {
+            202: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SubscriptionOut"];
+                    "application/json": components["schemas"]["SubscriptionRequestOut"];
                 };
             };
             /** @description Validation Error */
@@ -921,13 +1027,145 @@ export interface operations {
             };
         };
     };
-    unsubscribe_api_v1_subscriptions__subscriber_id__delete: {
+    confirm_subscription_api_v1_subscriptions_confirm_post: {
         parameters: {
             query?: never;
             header?: never;
-            path: {
-                subscriber_id: string;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenIn"];
             };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionStatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    manage_subscription_api_v1_subscriptions_manage_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManageIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionStatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unsubscribe_api_v1_subscriptions_unsubscribe_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionStatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_subscription_api_v1_subscriptions_delete_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionStatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unsubscribe_one_click_api_v1_subscriptions_unsubscribe_one_click_post: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -938,7 +1176,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SubscriptionOut"];
+                    "application/json": components["schemas"]["SubscriptionStatusOut"];
                 };
             };
             /** @description Validation Error */
