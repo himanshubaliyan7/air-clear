@@ -2,11 +2,11 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { confirmSubscription } from "@/api/endpoints";
 import { ErrorState } from "@/components/states";
-import { noReferrerMeta, SubscriptionShell } from "@/components/subscription/SubscriptionShell";
+import { SubscriptionShell } from "@/components/subscription/SubscriptionShell";
 import { TokenMissing, TokenRejected } from "@/components/subscription/TokenRejected";
 import { strings } from "@/i18n/strings";
 import { control, surface, typography } from "@/design/tokens";
-import { isTokenRejected, readToken } from "@/lib/subscription";
+import { isTokenRejected, noReferrerMeta, readToken } from "@/lib/subscription";
 
 const t = strings.subscriptions;
 

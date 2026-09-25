@@ -25,9 +25,3 @@ export function SubscriptionShell({ title, children }: { title: string; children
     </div>
   );
 }
-
-/**
- * Pages that read an emailed token from the URL must not leak it to other sites
- * through the Referer header (e.g. via the attribution links in the footer).
- */
-export const noReferrerMeta = { name: "referrer", content: "no-referrer" } as const;

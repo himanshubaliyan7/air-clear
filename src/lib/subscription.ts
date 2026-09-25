@@ -57,3 +57,9 @@ export function toggle(list: readonly string[], id: string): string[] {
 export function isTokenRejected(error: unknown): boolean {
   return error instanceof ApiError && error.status === 400;
 }
+
+/**
+ * Pages that read an emailed token from the URL must not leak it to other sites
+ * through the Referer header (e.g. via the attribution links in the footer).
+ */
+export const noReferrerMeta = { name: "referrer", content: "no-referrer" } as const;

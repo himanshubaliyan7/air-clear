@@ -7,7 +7,7 @@ import type { Pollutant, Region } from "@/api/types";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { DeleteDataControl } from "@/components/subscription/DeleteDataControl";
 import { SelectionFields } from "@/components/subscription/SelectionFields";
-import { noReferrerMeta, SubscriptionShell } from "@/components/subscription/SubscriptionShell";
+import { SubscriptionShell } from "@/components/subscription/SubscriptionShell";
 import { TokenMissing, TokenRejected } from "@/components/subscription/TokenRejected";
 import { strings } from "@/i18n/strings";
 import { control, surface, typography } from "@/design/tokens";

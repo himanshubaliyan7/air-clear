@@ -3,11 +3,11 @@ import { useMutation } from "@tanstack/react-query";
 import { unsubscribe } from "@/api/endpoints";
 import { ErrorState } from "@/components/states";
 import { DeleteDataControl } from "@/components/subscription/DeleteDataControl";
-import { noReferrerMeta, SubscriptionShell } from "@/components/subscription/SubscriptionShell";
+import { SubscriptionShell } from "@/components/subscription/SubscriptionShell";
 import { TokenMissing, TokenRejected } from "@/components/subscription/TokenRejected";
 import { strings } from "@/i18n/strings";
 import { control, surface, typography } from "@/design/tokens";
-import { isTokenRejected, readToken } from "@/lib/subscription";
+import { isTokenRejected, noReferrerMeta, readToken } from "@/lib/subscription";
 
 const t = strings.subscriptions;
 
