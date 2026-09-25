@@ -208,6 +208,69 @@ export const strings = {
     label: "Data credits",
   },
 
+  subscriptions: {
+    navLink: "Daily email",
+    subscribeTitle: "Get a daily outdoor-practice email",
+    subscribeIntro:
+      "Every evening you get tomorrow's outlook, and the two days after, for the stations you choose: go, caution, no-go, or no data. It comes every day, so a missing email never means \"go\".",
+    regionLabel: "Region",
+    emailLabel: "Email address",
+    emailHint: "We send a confirmation link here. Nothing starts until you open it.",
+    stationsLegend: "Stations",
+    stationsHint: (max: number) => `Choose up to ${max}.`,
+    stationsFilterLabel: "Filter stations",
+    noOutlookNow: "no outlook right now",
+    pollutantsLegend: "Pollutants",
+    selectedCount: (n: number, max: number) => `${n} of ${max} selected`,
+    errorNoStations: "Choose at least one station.",
+    errorTooManyStations: (max: number) => `Choose at most ${max} stations.`,
+    errorNoPollutants: "Choose at least one pollutant.",
+    submit: "Send confirmation link",
+    submitting: "Sending…",
+    checkEmailTitle: "Check your email",
+    privacyTitle: "What we keep",
+    privacyBody:
+      "Your email address and the stations and pollutants you choose, used only to send this email. Unconfirmed sign-ups are deleted after 7 days. You can unsubscribe or delete your data from any email, and after unsubscribing your details are deleted within 90 days.",
+
+    tokenMissingTitle: "This link is incomplete",
+    tokenMissingBody:
+      "Open the link from your email again, or copy the whole address into the browser.",
+    tokenRejectedTitle: "This link has expired or was already used",
+    tokenRejectedBody:
+      "Links in confirmation and manage emails stop working after 48 hours or once used. Request a new one below.",
+    requestNewLink: "Request a new link",
+
+    confirmTitle: "Confirm your daily email",
+    confirmBody: "Press the button to start receiving tomorrow's outlook every evening.",
+    confirmButton: "Confirm subscription",
+    confirmedTitle: "You're subscribed",
+    confirmedBody:
+      "The first email arrives this evening. Each one has links to change your stations or unsubscribe.",
+
+    manageTitle: "Change your daily email",
+    manageBody:
+      "Choose the stations and pollutants you want. This replaces your current selection and switches the email on if it was off.",
+    manageSave: "Save and switch on",
+    manageSaved: "Saved. Your next email uses this selection.",
+    otherActionsTitle: "Stop or delete",
+
+    unsubscribeTitle: "Stop the daily email",
+    unsubscribeBody: "You will stop receiving the daily outlook for your stations.",
+    unsubscribeButton: "Unsubscribe",
+    unsubscribedTitle: "You're unsubscribed",
+    unsubscribedBody:
+      "No more daily emails. Your details are kept for 90 days in case you switch back on from a manage link, then deleted.",
+
+    deleteButton: "Delete my data now",
+    deleteConfirmPrompt:
+      "This permanently deletes your email address, your selection and our record of emails sent to you. It cannot be undone.",
+    deleteConfirmButton: "Yes, delete everything",
+    cancel: "Cancel",
+    deletedTitle: "Your data is deleted",
+    deletedBody: "We no longer hold your email address. To get the email again, subscribe from the start.",
+    working: "Working…",
+  },
+
   modelHealth: {
     title: "Model health",
     operatorOnly: "Operator view. Not intended for school users.",

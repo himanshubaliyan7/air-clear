@@ -10,8 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as SubscribeRouteImport } from './routes/subscribe'
 import { Route as OperatorModelHealthRouteImport } from './routes/operator.model-health'
 import { Route as RRegionIdRouteImport } from './routes/r.$regionId'
+import { Route as SubscriptionsConfirmRouteImport } from './routes/subscriptions.confirm'
+import { Route as SubscriptionsManageRouteImport } from './routes/subscriptions.manage'
+import { Route as SubscriptionsUnsubscribeRouteImport } from './routes/subscriptions.unsubscribe'
 import { Route as RRegionIdIndexRouteImport } from './routes/r.$regionId.index'
 import { Route as RRegionIdSStationIdRouteImport } from './routes/r.$regionId.s.$stationId'
 import { Route as RRegionIdSStationIdIndexRouteImport } from './routes/r.$regionId.s.$stationId.index'
@@ -20,6 +24,11 @@ import { Route as RRegionIdSStationIdForecastRouteImport } from './routes/r.$reg
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscribeRoute = SubscribeRouteImport.update({
+  id: '/subscribe',
+  path: '/subscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OperatorModelHealthRoute = OperatorModelHealthRouteImport.update({
@@ -32,6 +41,22 @@ const RRegionIdRoute = RRegionIdRouteImport.update({
   path: '/r/$regionId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SubscriptionsConfirmRoute = SubscriptionsConfirmRouteImport.update({
+  id: '/subscriptions/confirm',
+  path: '/subscriptions/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsManageRoute = SubscriptionsManageRouteImport.update({
+  id: '/subscriptions/manage',
+  path: '/subscriptions/manage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SubscriptionsUnsubscribeRoute =
+  SubscriptionsUnsubscribeRouteImport.update({
+    id: '/subscriptions/unsubscribe',
+    path: '/subscriptions/unsubscribe',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const RRegionIdIndexRoute = RRegionIdIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -57,8 +82,12 @@ const RRegionIdSStationIdForecastRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/subscribe': typeof SubscribeRoute
   '/operator/model-health': typeof OperatorModelHealthRoute
   '/r/$regionId': typeof RRegionIdRouteWithChildren
+  '/subscriptions/confirm': typeof SubscriptionsConfirmRoute
+  '/subscriptions/manage': typeof SubscriptionsManageRoute
+  '/subscriptions/unsubscribe': typeof SubscriptionsUnsubscribeRoute
   '/r/$regionId/': typeof RRegionIdIndexRoute
   '/r/$regionId/s/$stationId': typeof RRegionIdSStationIdRouteWithChildren
   '/r/$regionId/s/$stationId/forecast': typeof RRegionIdSStationIdForecastRoute
@@ -66,7 +95,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/subscribe': typeof SubscribeRoute
   '/operator/model-health': typeof OperatorModelHealthRoute
+  '/subscriptions/confirm': typeof SubscriptionsConfirmRoute
+  '/subscriptions/manage': typeof SubscriptionsManageRoute
+  '/subscriptions/unsubscribe': typeof SubscriptionsUnsubscribeRoute
   '/r/$regionId': typeof RRegionIdIndexRoute
   '/r/$regionId/s/$stationId/forecast': typeof RRegionIdSStationIdForecastRoute
   '/r/$regionId/s/$stationId': typeof RRegionIdSStationIdIndexRoute
@@ -74,8 +107,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/subscribe': typeof SubscribeRoute
   '/operator/model-health': typeof OperatorModelHealthRoute
   '/r/$regionId': typeof RRegionIdRouteWithChildren
+  '/subscriptions/confirm': typeof SubscriptionsConfirmRoute
+  '/subscriptions/manage': typeof SubscriptionsManageRoute
+  '/subscriptions/unsubscribe': typeof SubscriptionsUnsubscribeRoute
   '/r/$regionId/': typeof RRegionIdIndexRoute
   '/r/$regionId/s/$stationId': typeof RRegionIdSStationIdRouteWithChildren
   '/r/$regionId/s/$stationId/forecast': typeof RRegionIdSStationIdForecastRoute
@@ -85,8 +122,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/subscribe'
     | '/operator/model-health'
     | '/r/$regionId'
+    | '/subscriptions/confirm'
+    | '/subscriptions/manage'
+    | '/subscriptions/unsubscribe'
     | '/r/$regionId/'
     | '/r/$regionId/s/$stationId'
     | '/r/$regionId/s/$stationId/forecast'
@@ -94,15 +135,23 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/subscribe'
     | '/operator/model-health'
+    | '/subscriptions/confirm'
+    | '/subscriptions/manage'
+    | '/subscriptions/unsubscribe'
     | '/r/$regionId'
     | '/r/$regionId/s/$stationId/forecast'
     | '/r/$regionId/s/$stationId'
   id:
     | '__root__'
     | '/'
+    | '/subscribe'
     | '/operator/model-health'
     | '/r/$regionId'
+    | '/subscriptions/confirm'
+    | '/subscriptions/manage'
+    | '/subscriptions/unsubscribe'
     | '/r/$regionId/'
     | '/r/$regionId/s/$stationId'
     | '/r/$regionId/s/$stationId/forecast'
@@ -111,8 +160,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  SubscribeRoute: typeof SubscribeRoute
   OperatorModelHealthRoute: typeof OperatorModelHealthRoute
   RRegionIdRoute: typeof RRegionIdRouteWithChildren
+  SubscriptionsConfirmRoute: typeof SubscriptionsConfirmRoute
+  SubscriptionsManageRoute: typeof SubscriptionsManageRoute
+  SubscriptionsUnsubscribeRoute: typeof SubscriptionsUnsubscribeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -122,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscribe': {
+      id: '/subscribe'
+      path: '/subscribe'
+      fullPath: '/subscribe'
+      preLoaderRoute: typeof SubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/operator/model-health': {
@@ -136,6 +196,27 @@ declare module '@tanstack/react-router' {
       path: '/r/$regionId'
       fullPath: '/r/$regionId'
       preLoaderRoute: typeof RRegionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions/confirm': {
+      id: '/subscriptions/confirm'
+      path: '/subscriptions/confirm'
+      fullPath: '/subscriptions/confirm'
+      preLoaderRoute: typeof SubscriptionsConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions/manage': {
+      id: '/subscriptions/manage'
+      path: '/subscriptions/manage'
+      fullPath: '/subscriptions/manage'
+      preLoaderRoute: typeof SubscriptionsManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/subscriptions/unsubscribe': {
+      id: '/subscriptions/unsubscribe'
+      path: '/subscriptions/unsubscribe'
+      fullPath: '/subscriptions/unsubscribe'
+      preLoaderRoute: typeof SubscriptionsUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/r/$regionId/': {
@@ -198,8 +279,12 @@ const RRegionIdRouteWithChildren = RRegionIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  SubscribeRoute: SubscribeRoute,
   OperatorModelHealthRoute: OperatorModelHealthRoute,
   RRegionIdRoute: RRegionIdRouteWithChildren,
+  SubscriptionsConfirmRoute: SubscriptionsConfirmRoute,
+  SubscriptionsManageRoute: SubscriptionsManageRoute,
+  SubscriptionsUnsubscribeRoute: SubscriptionsUnsubscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

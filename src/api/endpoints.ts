@@ -14,6 +14,10 @@ import type {
   Region,
   Station,
   StationDetail,
+  SubscriptionManage,
+  SubscriptionRequest,
+  SubscriptionRequestResult,
+  SubscriptionStatus,
 } from "./types";
 
 export function listRegions(signal?: AbortSignal) {
@@ -90,6 +94,37 @@ export function getServiceHealth(signal?: AbortSignal) {
 
 export function listAttributions(signal?: AbortSignal) {
   return apiGet<Attribution[]>("/attributions", { signal });
+}
+
+/**
+ * Subscriptions (Phase 4). Every credential arrives by email only; none of these
+ * responses ever contains one, and requestSubscription answers identically whatever
+ * state the address is in.
+ */
+export function requestSubscription(body: SubscriptionRequest) {
+  return request<SubscriptionRequestResult>("POST", "/subscriptions", { body });
+}
+
+export function confirmSubscription(token: string) {
+  return request<SubscriptionStatus>("POST", "/subscriptions/confirm", {
+    body: { token },
+  });
+}
+
+export function manageSubscription(body: SubscriptionManage) {
+  return request<SubscriptionStatus>("POST", "/subscriptions/manage", { body });
+}
+
+export function unsubscribe(token: string) {
+  return request<SubscriptionStatus>("POST", "/subscriptions/unsubscribe", {
+    body: { token },
+  });
+}
+
+export function deleteSubscription(token: string) {
+  return request<SubscriptionStatus>("POST", "/subscriptions/delete", {
+    body: { token },
+  });
 }
 
 export { request };
