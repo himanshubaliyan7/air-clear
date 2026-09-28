@@ -28,3 +28,4 @@ export type SubscriptionRequest = components["schemas"]["SubscriptionIn"];
 export type SubscriptionManage = components["schemas"]["ManageIn"];
 export type SubscriptionRequestResult = components["schemas"]["SubscriptionRequestOut"];
 export type SubscriptionStatus = components["schemas"]["SubscriptionStatusOut"];
+export type SubscriptionAvailability = components["schemas"]["SubscriptionAvailabilityOut"];

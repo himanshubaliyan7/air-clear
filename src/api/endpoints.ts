@@ -18,6 +18,7 @@ import type {
   SubscriptionRequest,
   SubscriptionRequestResult,
   SubscriptionStatus,
+  SubscriptionAvailability,
 } from "./types";
 
 export function listRegions(signal?: AbortSignal) {
@@ -101,6 +102,11 @@ export function listAttributions(signal?: AbortSignal) {
  * responses ever contains one, and requestSubscription answers identically whatever
  * state the address is in.
  */
+/** Whether sign-ups are open or invite-only (demo mode). Never lists who is invited. */
+export function getSubscriptionAvailability(signal?: AbortSignal) {
+  return apiGet<SubscriptionAvailability>("/subscriptions/availability", { signal });
+}
+
 export function requestSubscription(body: SubscriptionRequest) {
   return request<SubscriptionRequestResult>("POST", "/subscriptions", { body });
 }

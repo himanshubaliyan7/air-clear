@@ -228,6 +228,7 @@ export const strings = {
     submit: "Send confirmation link",
     submitting: "Sending…",
     checkEmailTitle: "Check your email",
+    demoTitle: "Demo: invite-only",
     privacyTitle: "What we keep",
     privacyBody:
       "Your email address and the stations and pollutants you choose, used only to send this email. Unconfirmed sign-ups are deleted after 7 days. You can unsubscribe or delete your data from any email, and after unsubscribing your details are deleted within 90 days.",

@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
-import { regionsQuery } from "@/api/queries";
+import { regionsQuery, subscriptionAvailabilityQuery } from "@/api/queries";
 import { requestSubscription } from "@/api/endpoints";
 import type { Pollutant } from "@/api/types";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { SelectionFields } from "@/components/subscription/SelectionFields";
 import { SubscriptionShell } from "@/components/subscription/SubscriptionShell";
 import { strings } from "@/i18n/strings";
-import { control, surface, typography } from "@/design/tokens";
+import { control, recommendationTone, surface, typography } from "@/design/tokens";
 import { hasErrors, validateSelection, type SelectionErrors } from "@/lib/subscription";
 
 const t = strings.subscriptions;
@@ -34,10 +34,25 @@ export const Route = createFileRoute("/subscribe")({
 function SubscribePage() {
   const { region: requested } = Route.useSearch();
   const { data: regions, isPending, error, refetch } = useQuery(regionsQuery());
+  // If this fails the notice is simply not shown: the server enforces the invite list either way.
+  const { data: availability } = useQuery(subscriptionAvailabilityQuery());
 
   return (
     <SubscriptionShell title={t.subscribeTitle}>
       <p className={typography.body}>{t.subscribeIntro}</p>
+      {availability && !availability.open && (
+        <section
+          role="note"
+          aria-labelledby="demo-title"
+          className={`${recommendationTone.warning} rounded-md p-3`}
+        >
+          <h2 id="demo-title" className={typography.sectionTitle}>
+            {t.demoTitle}
+          </h2>
+          {/* The API's own wording, so the notice always matches the server setting. */}
+          <p className={`${typography.small} ${surface.muted} mt-1`}>{availability.message}</p>
+        </section>
+      )}
       {isPending && <LoadingState />}
       {error && <ErrorState error={error} onRetry={() => void refetch()} />}
       {regions && regions.length === 0 && (

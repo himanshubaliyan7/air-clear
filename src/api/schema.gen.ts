@@ -77,7 +77,7 @@ export interface paths {
         };
         /**
          * Get Current Aqi
-         * @description Official CPCB AQI right now (no forecast involved), when data.gov.in has
+         * @description Official CPCB AQI right now (no forecast involved), when CPCB has
          *     a recent reading for this station.
          */
         get: operations["get_current_aqi_api_v1_stations__station_id__current_aqi_get"];
@@ -196,6 +196,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/subscriptions/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Subscription Availability
+         * @description Lets a client say up front that sign-ups are invite-only (demo mode).
+         */
+        get: operations["subscription_availability_api_v1_subscriptions_availability_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/subscriptions": {
         parameters: {
             query?: never;
@@ -211,6 +231,10 @@ export interface paths {
          *     hint whether the address is already known). Emails a confirmation link for
          *     a new/pending address, or a manage link for a confirmed one; nothing is
          *     activated or modified until the mailbox owner uses a link.
+         *
+         *     In demo mode an address that is not invited gets the same 202, but nothing
+         *     is stored or sent: the reply must not reveal who is invited, and we keep no
+         *     data about people who cannot use the service.
          */
         post: operations["request_subscription_api_v1_subscriptions_post"];
         delete?: never;
@@ -635,6 +659,16 @@ export interface components {
              */
             has_current_aqi: boolean;
         };
+        /**
+         * SubscriptionAvailabilityOut
+         * @description Whether anyone may sign up. Never lists or hints at the invited addresses.
+         */
+        SubscriptionAvailabilityOut: {
+            /** Open */
+            open: boolean;
+            /** Message */
+            message: string;
+        };
         /** SubscriptionIn */
         SubscriptionIn: {
             /** Station Ids */
@@ -990,6 +1024,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    subscription_availability_api_v1_subscriptions_availability_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionAvailabilityOut"];
                 };
             };
         };
