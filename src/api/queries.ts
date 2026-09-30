@@ -28,6 +28,15 @@ export const regionsQuery = () =>
     refetchInterval: false as const,
   });
 
+/** Rarely changes (a server setting), so fetched once per page view. */
+export const subscriptionAvailabilityQuery = () =>
+  queryOptions({
+    queryKey: ["subscription-availability"] as const,
+    queryFn: ({ signal }) => api.getSubscriptionAvailability(signal),
+    ...shared,
+    refetchInterval: false as const,
+  });
+
 export const regionQuery = (regionId: string) =>
   queryOptions({
     queryKey: ["region", regionId] as const,

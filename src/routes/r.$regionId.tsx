@@ -25,6 +25,13 @@ function RegionLayout() {
             {strings.app.name}
           </Link>
 
+          <Link
+            to="/subscribe"
+            search={{ region: regionId }}
+            className={control.button}
+          >
+            {strings.subscriptions.navLink}
+          </Link>
           {/* Region switcher: hidden while the service covers a single region. */}
           {data && data.length > 1 && (
             <label className="flex items-center gap-2 text-sm">
