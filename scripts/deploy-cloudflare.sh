@@ -19,7 +19,7 @@
 set -euo pipefail
 
 : "${CLOUDFLARE_API_TOKEN:?Set CLOUDFLARE_API_TOKEN (see comment above for how to generate one)}"
-: "${VITE_API_BASE_URL:?Set VITE_API_BASE_URL to the backend's https:// URL}"
+: "${VITE_API_BASE_URL:?Set VITE_API_BASE_URL to the backend https:// URL}"
 
 npm run build
 
