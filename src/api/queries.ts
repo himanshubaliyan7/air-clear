@@ -53,6 +53,13 @@ export const stationsQuery = (regionId?: string) =>
     refetchInterval: false as const,
   });
 
+export const overviewQuery = (regionId?: string) =>
+  queryOptions({
+    queryKey: ["overview", regionId ?? null] as const,
+    queryFn: ({ signal }) => api.getOverview(regionId ? { region_id: regionId } : {}, signal),
+    ...shared,
+  });
+
 export const stationQuery = (stationId: string) =>
   queryOptions({
     queryKey: ["station", stationId] as const,

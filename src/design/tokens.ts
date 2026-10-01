@@ -71,3 +71,35 @@ export const statusTone = {
   neutral: "border border-border bg-muted text-foreground",
   alert: "border border-destructive bg-card text-foreground",
 } as const;
+
+/**
+ * The globe view. Its controls sit on top of dark satellite imagery, so they use
+ * their own dark, translucent surfaces instead of the page tokens.
+ */
+export const globe = {
+  page: "relative h-[100dvh] w-full overflow-hidden bg-black text-white",
+  stage: "absolute inset-0",
+  canvas: "h-full w-full",
+  notice:
+    "absolute inset-x-4 top-1/2 -translate-y-1/2 rounded-lg bg-black/70 p-4 text-center text-sm",
+  chrome: "rounded-lg border border-white/15 bg-black/70 p-3 text-white backdrop-blur",
+  muted: "text-white/65",
+  label: "text-xs font-semibold uppercase tracking-wide text-white/65",
+  header: "absolute left-3 top-3 max-w-[calc(100%-4.5rem)] sm:max-w-sm",
+  controls: "absolute right-3 top-3 flex flex-col gap-1",
+  controlButton:
+    "h-9 w-9 rounded-md border border-white/20 bg-black/70 text-lg leading-none text-white backdrop-blur transition-colors hover:bg-black/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
+  timeline:
+    "absolute inset-x-3 bottom-10 sm:inset-x-auto sm:left-1/2 sm:w-[36rem] sm:max-w-[calc(100%-1.5rem)] sm:-translate-x-1/2",
+  stepButton:
+    "min-w-9 rounded-md border border-white/20 px-2 py-1 text-xs font-medium transition-colors hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
+  stepButtonActive: "border-white bg-white text-black hover:bg-white",
+  textButton:
+    "rounded-sm text-sm underline underline-offset-2 hover:text-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
+  panel:
+    "absolute inset-x-0 bottom-0 z-10 max-h-[62dvh] overflow-y-auto rounded-b-none sm:inset-x-auto sm:bottom-auto sm:right-14 sm:top-3 sm:max-h-[calc(100dvh-1.5rem)] sm:w-80 sm:rounded-b-lg",
+  swatch: "inline-block h-3 w-3 shrink-0 rounded-full border border-white/50",
+  swatchHollow: "inline-block h-3 w-3 shrink-0 rounded-full border-2 bg-black/40",
+  dayRow: "flex items-center gap-2 rounded-md px-1 py-0.5 text-sm",
+  dayRowShown: "bg-white/15",
+} as const;

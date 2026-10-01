@@ -196,6 +196,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Overview */
+        get: operations["get_overview_api_v1_overview_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/subscriptions/availability": {
         parameters: {
             query?: never;
@@ -548,6 +565,54 @@ export interface components {
             category: string;
             /** Driver */
             driver: string;
+        };
+        /**
+         * OverviewCurrentAqiOut
+         * @description GET /stations/{id}/current-aqi without the per-station constants (see OverviewOut).
+         */
+        OverviewCurrentAqiOut: {
+            /** As Of */
+            as_of: string | null;
+            /** Is Current */
+            is_current: boolean;
+            overall: components["schemas"]["OverallAqiOut"] | null;
+            /** At Or Above Health Threshold */
+            at_or_above_health_threshold?: boolean | null;
+            /** Pollutants */
+            pollutants: components["schemas"]["PollutantAqiOut"][];
+        };
+        /**
+         * OverviewOut
+         * @description Everything a map needs for every active station, in one response.
+         */
+        OverviewOut: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Attribution */
+            attribution: string;
+            /** Stations */
+            stations: components["schemas"]["OverviewStationOut"][];
+        };
+        /** OverviewStationOut */
+        OverviewStationOut: {
+            /** Station Id */
+            station_id: string;
+            /** Name */
+            name: string;
+            /** Lat */
+            lat: number;
+            /** Lon */
+            lon: number;
+            /** City */
+            city: string;
+            /** Region Id */
+            region_id?: string | null;
+            current_aqi: components["schemas"]["OverviewCurrentAqiOut"];
+            /** Outlooks */
+            outlooks: components["schemas"]["ExceedanceSummaryOut"][];
         };
         /**
          * Pollutant
@@ -1015,6 +1080,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ExceedanceSummaryOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_overview_api_v1_overview_get: {
+        parameters: {
+            query?: {
+                region_id?: string | null;
+                days_ahead?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OverviewOut"];
                 };
             };
             /** @description Validation Error */

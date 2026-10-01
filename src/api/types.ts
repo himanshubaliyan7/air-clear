@@ -29,3 +29,6 @@ export type SubscriptionManage = components["schemas"]["ManageIn"];
 export type SubscriptionRequestResult = components["schemas"]["SubscriptionRequestOut"];
 export type SubscriptionStatus = components["schemas"]["SubscriptionStatusOut"];
 export type SubscriptionAvailability = components["schemas"]["SubscriptionAvailabilityOut"];
+export type Overview = components["schemas"]["OverviewOut"];
+export type OverviewStation = components["schemas"]["OverviewStationOut"];
+export type OverviewCurrentAqi = components["schemas"]["OverviewCurrentAqiOut"];

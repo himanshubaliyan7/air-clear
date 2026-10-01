@@ -11,6 +11,7 @@ import type {
   ForecastSeries,
   History,
   ModelHealth,
+  Overview,
   Region,
   Station,
   StationDetail,
@@ -34,6 +35,14 @@ export function listStations(regionId?: string, signal?: AbortSignal) {
     query: { region_id: regionId },
     signal,
   });
+}
+
+/** Every active station's current reading and outlooks in one response (map views). */
+export function getOverview(
+  params: { region_id?: string; days_ahead?: number } = {},
+  signal?: AbortSignal,
+) {
+  return apiGet<Overview>("/overview", { query: params, signal });
 }
 
 export function getStation(stationId: string, signal?: AbortSignal) {

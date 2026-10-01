@@ -39,6 +39,46 @@ export const strings = {
     serverBody: "Please try again in a moment.",
   },
 
+  globe: {
+    pageTitle: "Globe",
+    description:
+      "Monitoring stations on a globe, coloured by air-quality category, now and for the days ahead.",
+    mapLabel: "Globe showing monitoring stations",
+    navLink: "Globe view",
+    listLink: "Station list",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    resetView: "Back to the region",
+    unsupported: "This browser cannot draw the globe. The station list shows the same information.",
+    stepNow: "Now",
+    play: "Play through the days",
+    pause: "Pause",
+    sliderLabel: "Time shown on the globe",
+    showingNow: "Showing the official air-quality index right now.",
+    showingDay: (day: string, pollutant: string) =>
+      `Showing the ${pollutant} forecast for ${day} (worst case).`,
+    counts: (withValue: number, total: number) =>
+      `${withValue} of ${total} stations have a value for this time.`,
+    legendTitle: "Category",
+    legendNoData: "No data",
+    legendNoDataNote: "Grey and hollow. Not a sign of clean air.",
+    heightNote: "Taller columns mean worse air.",
+    selectHint: "Select a station on the globe to see its reading and outlook.",
+    closePanel: "Close",
+    stationPage: "Open the station page",
+    nowTitle: "Right now",
+    indexValue: (value: number) => `Index ${value}`,
+    outlookTitle: (pollutant: string) => `Outlook (${pollutant})`,
+    noDay: "No forecast for this day.",
+    dayLikelyAbove: "Likely above threshold",
+    dayLikelyBelow: "Likely below threshold",
+    imageryCredit:
+      "Sentinel-2 cloudless by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2020)",
+    imageryUrl: "https://s2maps.eu",
+    labelsCredit: "OpenFreeMap, OpenMapTiles, OpenStreetMap contributors",
+    labelsUrl: "https://openfreemap.org",
+  },
+
   regions: {
     switcherLabel: "Region",
     noneTitle: "No regions available",
