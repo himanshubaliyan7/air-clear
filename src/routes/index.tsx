@@ -5,6 +5,7 @@ import { regionsQuery } from "@/api/queries";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { strings } from "@/i18n/strings";
 import { control, surface, typography } from "@/design/tokens";
+import { browserStorage, readRememberedStation } from "@/lib/dashboard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -29,7 +30,8 @@ export const Route = createFileRoute("/")({
 });
 
 /**
- * The region is always in the URL. With exactly one region we skip the picker and go
+ * The region is always in the URL. A visitor who has opened a station before goes
+ * straight back to it. Otherwise, with exactly one region we skip the picker and go
  * straight in; the region itself never leaves the data flow, so a second region needs
  * no code change here.
  */
@@ -39,13 +41,25 @@ function RegionGateway() {
   const onlyRegionId = data && data.length === 1 ? (data[0]?.id ?? null) : null;
 
   useEffect(() => {
+    if (!data) return;
+    // A returning visitor lands on the station they looked at last.
+    const remembered = readRememberedStation(browserStorage());
+    if (remembered && data.some((region) => region.id === remembered.regionId)) {
+      void navigate({
+        to: "/r/$regionId/s/$stationId",
+        params: remembered,
+        search: {},
+        replace: true,
+      });
+      return;
+    }
     if (!onlyRegionId) return;
     void navigate({
       to: "/r/$regionId",
       params: { regionId: onlyRegionId },
       replace: true,
     });
-  }, [onlyRegionId, navigate]);
+  }, [data, onlyRegionId, navigate]);
 
   return (
     <main className={`${surface.page} min-h-screen p-4 sm:p-8`}>
