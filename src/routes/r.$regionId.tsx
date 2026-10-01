@@ -25,9 +25,6 @@ function RegionLayout() {
             {strings.app.name}
           </Link>
 
-          <Link to="/globe" search={{ region: regionId }} className={control.button}>
-            {strings.globe.navLink}
-          </Link>
           <Link
             to="/subscribe"
             search={{ region: regionId }}

@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as GlobeRouteImport } from './routes/globe'
 import { Route as SubscribeRouteImport } from './routes/subscribe'
 import { Route as OperatorModelHealthRouteImport } from './routes/operator.model-health'
 import { Route as RRegionIdRouteImport } from './routes/r.$regionId'
@@ -25,11 +24,6 @@ import { Route as RRegionIdSStationIdForecastRouteImport } from './routes/r.$reg
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GlobeRoute = GlobeRouteImport.update({
-  id: '/globe',
-  path: '/globe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubscribeRoute = SubscribeRouteImport.update({
@@ -88,7 +82,6 @@ const RRegionIdSStationIdForecastRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/globe': typeof GlobeRoute
   '/subscribe': typeof SubscribeRoute
   '/operator/model-health': typeof OperatorModelHealthRoute
   '/r/$regionId': typeof RRegionIdRouteWithChildren
@@ -102,7 +95,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/globe': typeof GlobeRoute
   '/subscribe': typeof SubscribeRoute
   '/operator/model-health': typeof OperatorModelHealthRoute
   '/subscriptions/confirm': typeof SubscriptionsConfirmRoute
@@ -115,7 +107,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/globe': typeof GlobeRoute
   '/subscribe': typeof SubscribeRoute
   '/operator/model-health': typeof OperatorModelHealthRoute
   '/r/$regionId': typeof RRegionIdRouteWithChildren
@@ -131,7 +122,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/globe'
     | '/subscribe'
     | '/operator/model-health'
     | '/r/$regionId'
@@ -145,7 +135,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/globe'
     | '/subscribe'
     | '/operator/model-health'
     | '/subscriptions/confirm'
@@ -157,7 +146,6 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/globe'
     | '/subscribe'
     | '/operator/model-health'
     | '/r/$regionId'
@@ -172,7 +160,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  GlobeRoute: typeof GlobeRoute
   SubscribeRoute: typeof SubscribeRoute
   OperatorModelHealthRoute: typeof OperatorModelHealthRoute
   RRegionIdRoute: typeof RRegionIdRouteWithChildren
@@ -188,13 +175,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/globe': {
-      id: '/globe'
-      path: '/globe'
-      fullPath: '/globe'
-      preLoaderRoute: typeof GlobeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subscribe': {
@@ -299,7 +279,6 @@ const RRegionIdRouteWithChildren = RRegionIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  GlobeRoute: GlobeRoute,
   SubscribeRoute: SubscribeRoute,
   OperatorModelHealthRoute: OperatorModelHealthRoute,
   RRegionIdRoute: RRegionIdRouteWithChildren,

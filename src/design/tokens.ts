@@ -73,33 +73,31 @@ export const statusTone = {
 } as const;
 
 /**
- * The globe view. Its controls sit on top of dark satellite imagery, so they use
- * their own dark, translucent surfaces instead of the page tokens.
+ * The station dashboard: a grid of tiles that collapses to one column on a phone.
  */
-export const globe = {
-  page: "relative h-[100dvh] w-full overflow-hidden bg-black text-white",
-  stage: "absolute inset-0",
-  canvas: "h-full w-full",
-  notice:
-    "absolute inset-x-4 top-1/2 -translate-y-1/2 rounded-lg bg-black/70 p-4 text-center text-sm",
-  chrome: "rounded-lg border border-white/15 bg-black/70 p-3 text-white backdrop-blur",
-  muted: "text-white/65",
-  label: "text-xs font-semibold uppercase tracking-wide text-white/65",
-  header: "absolute left-3 top-3 max-w-[calc(100%-4.5rem)] sm:max-w-sm",
-  controls: "absolute right-3 top-3 flex flex-col gap-1",
-  controlButton:
-    "h-9 w-9 rounded-md border border-white/20 bg-black/70 text-lg leading-none text-white backdrop-blur transition-colors hover:bg-black/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
-  timeline:
-    "absolute inset-x-3 bottom-10 sm:inset-x-auto sm:left-1/2 sm:w-[36rem] sm:max-w-[calc(100%-1.5rem)] sm:-translate-x-1/2",
-  stepButton:
-    "min-w-9 rounded-md border border-white/20 px-2 py-1 text-xs font-medium transition-colors hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
-  stepButtonActive: "border-white bg-white text-black hover:bg-white",
-  textButton:
-    "rounded-sm text-sm underline underline-offset-2 hover:text-white/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
-  panel:
-    "absolute inset-x-0 bottom-0 z-10 max-h-[62dvh] overflow-y-auto rounded-b-none sm:inset-x-auto sm:bottom-auto sm:right-14 sm:top-3 sm:max-h-[calc(100dvh-1.5rem)] sm:w-80 sm:rounded-b-lg",
-  swatch: "inline-block h-3 w-3 shrink-0 rounded-full border border-white/50",
-  swatchHollow: "inline-block h-3 w-3 shrink-0 rounded-full border-2 bg-black/40",
-  dayRow: "flex items-center gap-2 rounded-md px-1 py-0.5 text-sm",
-  dayRowShown: "bg-white/15",
+export const dashboard = {
+  grid: "grid grid-cols-1 gap-4 md:grid-cols-12",
+  tile: "rounded-xl border border-border bg-card p-4 text-card-foreground shadow-sm",
+  hero: "md:col-span-7",
+  outlook: "md:col-span-5 md:row-span-2",
+  pollutants: "md:col-span-7",
+  history: "md:col-span-7",
+  nearby: "md:col-span-5",
+  map: "md:col-span-12",
+  tileHeader: "mb-3 flex flex-wrap items-center justify-between gap-2",
+  tileTitle: "text-xs font-semibold uppercase tracking-wide text-muted-foreground",
+  heroBar: "mb-3 h-2 w-full rounded-full",
+  heroValue: "text-3xl font-semibold tracking-tight sm:text-4xl",
+  swatch: "inline-block h-3 w-3 shrink-0 rounded-full border border-black/20",
+  swatchHollow: "inline-block h-3 w-3 shrink-0 rounded-full border-2 border-dashed bg-transparent",
+  pollutantGrid: "grid grid-cols-2 gap-2 sm:grid-cols-4",
+  pollutantTile: "rounded-lg border border-border bg-background p-2",
+  pollutantValue: "text-xl font-semibold",
+  row: "flex items-center gap-2 rounded-md px-1 py-1.5 text-sm",
+  rowLink:
+    "flex items-center gap-2 rounded-md px-1 py-1.5 text-sm transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+  link: "text-sm underline underline-offset-2 hover:text-foreground/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+  mapFrame: "relative isolate overflow-hidden rounded-lg border border-border",
+  mapCanvas: "h-80 w-full sm:h-96",
+  mapNotice: "p-4 text-sm",
 } as const;
