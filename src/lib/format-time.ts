@@ -59,6 +59,17 @@ export function formatTickInZone(ms: number, timeZone: string): string {
   }).format(date);
 }
 
+/** Axis label for a value that stands for a whole day: day and month in the given zone. */
+export function formatDayTickInZone(ms: number, timeZone: string): string {
+  const date = new Date(ms);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat(locale(), {
+    timeZone,
+    day: "numeric",
+    month: "short",
+  }).format(date);
+}
+
 /**
  * The calendar day an instant falls on inside the region's zone, as YYYY-MM-DD.
  * A UTC instant late in the evening can belong to the next day in an ahead-of-UTC

@@ -16,11 +16,13 @@ import {
   formatPercent,
   formatTickInZone,
 } from "@/lib/format-time";
-import { formatPollutantId } from "@/lib/pollutants";
+import { formatPollutantId, withUnit } from "@/lib/pollutants";
 import {
   currentReadingState,
   currentThresholdMessage,
+  describeDayVerdict,
   describeOutlook,
+  isDailyMean,
 } from "@/lib/station-overview";
 import type { RegionContextValue } from "@/region/region-context";
 import { strings } from "@/i18n/strings";
@@ -172,12 +174,21 @@ export function OutlookTile({
 }) {
   const view = describeOutlook(data);
   const madeAt = regionContext.formatAsOf(data.forecast_made_at);
+  const daily = isDailyMean(data.target);
+  const unit = pollutantDetail(regionContext.region, data.pollutant).unit;
+  const concentration = (v: number | null | undefined) =>
+    withUnit(formatNumber(v, { maximumFractionDigits: 0 }), unit);
   return (
     <div className="space-y-3">
       {view.isCurrent ? (
         <div className={`rounded-md p-3 ${recommendationTone[view.recommendation.tone]}`}>
           <p className="text-lg font-semibold">{view.recommendation.label}</p>
           <p className={typography.body}>{view.recommendation.description}</p>
+          {daily && !view.recommendation.isUnknown && (
+            <p className={`${typography.small} ${surface.muted} mt-1`}>
+              {strings.outlook.overallCovers(data.days.length)}
+            </p>
+          )}
           {data.forecast_made_at && (
             <p className={`${typography.small} ${surface.muted} mt-1`}>
               {strings.outlook.madeAt(madeAt)}
@@ -209,27 +220,46 @@ export function OutlookTile({
       )}
       {view.hasDays && (
         <ul className="divide-y divide-border">
-          {data.days.map((day) => (
-            <li key={day.date} className="py-2">
-              <p className="flex items-center gap-2 text-sm">
-                <CategorySwatch id={day.aqi_category} categories={regionContext.categories} />
-                <span className="w-24 shrink-0 font-medium">
-                  {regionContext.formatDay(day.date) ?? day.date}
-                </span>
-                <span>
-                  {regionContext.describeCategory(day.aqi_category)?.label ?? day.aqi_category}
-                </span>
-              </p>
-              <p className={`${typography.small} ${surface.muted} pl-5`}>
-                {strings.dashboard.dayChance(formatPercent(day.exceedance_probability))}
-                {" · "}
-                {strings.dashboard.dayWorstCase(
-                  formatNumber(day.worst_case_value, { maximumFractionDigits: 0 }),
-                )}
-              </p>
-            </li>
-          ))}
+          {data.days.map((day) => {
+            const verdict = describeDayVerdict(data, day);
+            return (
+              <li key={day.date} className="py-2">
+                <p className="flex items-center gap-2 text-sm">
+                  <CategorySwatch id={day.aqi_category} categories={regionContext.categories} />
+                  <span className="w-24 shrink-0 font-medium">
+                    {regionContext.formatDay(day.date) ?? day.date}
+                  </span>
+                  <span>
+                    {regionContext.describeCategory(day.aqi_category)?.label ?? day.aqi_category}
+                  </span>
+                  {verdict && <span className="ml-auto font-medium">{verdict.label}</span>}
+                </p>
+                <p className={`${typography.small} ${surface.muted} pl-5`}>
+                  {daily ? (
+                    <>
+                      {strings.dashboard.dayExpectedMean(concentration(day.expected_value))}
+                      {" · "}
+                      {strings.dashboard.dayCouldReach(
+                        formatNumber(day.worst_case_value, { maximumFractionDigits: 0 }),
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {strings.dashboard.dayChance(formatPercent(day.exceedance_probability))}
+                      {" · "}
+                      {strings.dashboard.dayWorstCase(
+                        formatNumber(day.worst_case_value, { maximumFractionDigits: 0 }),
+                      )}
+                    </>
+                  )}
+                </p>
+              </li>
+            );
+          })}
         </ul>
+      )}
+      {daily && view.hasDays && (
+        <p className={`${typography.small} ${surface.muted}`}>{strings.outlook.estimateNote}</p>
       )}
     </div>
   );

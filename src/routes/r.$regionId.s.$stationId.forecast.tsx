@@ -9,11 +9,15 @@ import { strings } from "@/i18n/strings";
 import { control, surface, typography } from "@/design/tokens";
 import { useRegion } from "@/region/region-context";
 import {
+  calendarDayInZone,
   formatAsOf,
+  formatCalendarDate,
   formatDateTimeInZone,
+  formatDayTickInZone,
   formatNumber,
   formatTickInZone,
 } from "@/lib/format-time";
+import { isDailyMean } from "@/lib/station-overview";
 import { formatPollutantId, withUnit } from "@/lib/pollutants";
 import { resolvePollutant } from "@/lib/stations";
 import {
@@ -266,6 +270,14 @@ function ForecastSection({
 }) {
   const [showTable, setShowTable] = useState(false);
   const f = useFormatters(detail);
+  // A daily-mean point stands for the whole local day that starts at its target time.
+  const daily = isDailyMean(data.target);
+  const expectedLabel = daily
+    ? strings.forecastDetail.expectedDayMean
+    : strings.forecastDetail.expected;
+  const when = (iso: string) =>
+    (daily ? formatCalendarDate(calendarDayInZone(iso, zone)) : formatDateTimeInZone(iso, zone)) ??
+    iso;
   const points = data.forecasts
     .map((p) => ({ ...p, x: new Date(p.target_time).getTime() }))
     .filter((p) => Number.isFinite(p.x))
@@ -280,6 +292,9 @@ function ForecastSection({
         {strings.outlook.madeAt(formatAsOf(data.forecast_made_at, zone))}{" "}
         {strings.forecastDetail.timesIn(zone)}
       </p>
+      {daily && (
+        <p className={`${typography.small} ${surface.muted}`}>{strings.forecastDetail.dailyNote}</p>
+      )}
       {!f.threshold && (
         <p className={`${typography.small} ${surface.muted}`}>{strings.forecastDetail.noThreshold}</p>
       )}
@@ -289,12 +304,16 @@ function ForecastSection({
         <>
           <TimeChart
             title={strings.forecastDetail.forecastTitle}
-            summary={strings.forecastDetail.forecastSummary(points.length, f.unitText)}
+            summary={
+              daily
+                ? strings.forecastDetail.dailyForecastSummary(points.length, f.unitText)
+                : strings.forecastDetail.forecastSummary(points.length, f.unitText)
+            }
             xs={points.map((p) => p.x)}
             lines={[
               {
                 id: "expected",
-                label: strings.forecastDetail.expected,
+                label: expectedLabel,
                 tone: "primary",
                 points: points.map((p) => ({ x: p.x, y: p.point_forecast ?? null })),
               },
@@ -305,14 +324,14 @@ function ForecastSection({
             }}
             threshold={f.threshold}
             axisLabel={f.axisLabel}
-            formatTick={(x) => formatTickInZone(x, zone)}
+            formatTick={(x) => (daily ? formatDayTickInZone(x, zone) : formatTickInZone(x, zone))}
             formatValue={(v) => formatNumber(v)}
             tooltip={(i) => {
               const p = points[i]!;
               return {
-                heading: formatDateTimeInZone(p.target_time, zone) ?? p.target_time,
+                heading: when(p.target_time),
                 rows: [
-                  { label: strings.forecastDetail.expected, value: f.value(p.point_forecast) },
+                  { label: expectedLabel, value: f.value(p.point_forecast) },
                   { label: strings.forecastDetail.low, value: f.value(p.quantile_low) },
                   { label: strings.forecastDetail.high, value: f.value(p.quantile_high) },
                 ],
@@ -328,9 +347,13 @@ function ForecastSection({
                 </caption>
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="py-2 pr-3">{strings.forecastDetail.time}</th>
-                    <th className="py-2 pr-3">{strings.forecastDetail.horizon}</th>
-                    <th className="py-2 pr-3">{strings.forecastDetail.expected}</th>
+                    <th className="py-2 pr-3">
+                      {daily ? strings.forecastDetail.day : strings.forecastDetail.time}
+                    </th>
+                    <th className="py-2 pr-3">
+                      {daily ? strings.forecastDetail.daysAhead : strings.forecastDetail.horizon}
+                    </th>
+                    <th className="py-2 pr-3">{expectedLabel}</th>
                     <th className="py-2 pr-3">{strings.forecastDetail.low}</th>
                     <th className="py-2">{strings.forecastDetail.high}</th>
                   </tr>
@@ -339,9 +362,11 @@ function ForecastSection({
                   {points.map((p) => (
                     <tr key={p.target_time} className="border-b border-border">
                       <th scope="row" className="py-2 pr-3 font-medium">
-                        {formatDateTimeInZone(p.target_time, zone) ?? p.target_time}
+                        {when(p.target_time)}
                       </th>
-                      <td className="py-2 pr-3">{formatNumber(p.horizon_hours)}</td>
+                      <td className="py-2 pr-3">
+                        {formatNumber(daily ? p.horizon_hours / 24 : p.horizon_hours)}
+                      </td>
                       <td className="py-2 pr-3"><ValueCell v={p.point_forecast} unit={detail.unit} /></td>
                       <td className="py-2 pr-3"><ValueCell v={p.quantile_low} unit={detail.unit} /></td>
                       <td className="py-2"><ValueCell v={p.quantile_high} unit={detail.unit} /></td>
@@ -377,12 +402,25 @@ function HistoryContent({
 
   if (points.length === 0) return <EmptyState body={strings.forecastDetail.noHistoryPoints} />;
 
+  const daily = isDailyMean(data.target);
+  const forecastLabel = daily
+    ? strings.forecastDetail.forecastDayMean
+    : strings.forecastDetail.forecastValue;
   return (
     <>
       <p className={`${typography.small} ${surface.muted}`}>{strings.forecastDetail.timesIn(zone)}</p>
+      {daily && (
+        <p className={`${typography.small} ${surface.muted}`}>
+          {strings.forecastDetail.dailyHistoryNote}
+        </p>
+      )}
       <TimeChart
         title={strings.forecastDetail.historyTitle}
-        summary={strings.forecastDetail.historySummary(days, f.unitText)}
+        summary={
+          daily
+            ? strings.forecastDetail.dailyHistorySummary(days, f.unitText)
+            : strings.forecastDetail.historySummary(days, f.unitText)
+        }
         xs={points.map((p) => p.x)}
         lines={[
           {
@@ -393,7 +431,7 @@ function HistoryContent({
           },
           {
             id: "forecast",
-            label: strings.forecastDetail.forecastValue,
+            label: forecastLabel,
             tone: "secondary",
             points: points.map((p) => ({ x: p.x, y: p.forecast_value ?? null })),
           },
@@ -408,7 +446,7 @@ function HistoryContent({
             heading: formatDateTimeInZone(p.time, zone) ?? p.time,
             rows: [
               { label: strings.forecastDetail.actual, value: f.value(p.actual) },
-              { label: strings.forecastDetail.forecastValue, value: f.value(p.forecast_value) },
+              { label: forecastLabel, value: f.value(p.forecast_value) },
             ],
           };
         }}
@@ -424,7 +462,7 @@ function HistoryContent({
               <tr className="border-b border-border">
                 <th className="py-2 pr-3">{strings.forecastDetail.time}</th>
                 <th className="py-2 pr-3">{strings.forecastDetail.actual}</th>
-                <th className="py-2">{strings.forecastDetail.forecastValue}</th>
+                <th className="py-2">{forecastLabel}</th>
               </tr>
             </thead>
             <tbody>
