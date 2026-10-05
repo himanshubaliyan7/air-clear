@@ -56,6 +56,7 @@ export const strings = {
     subtitle:
       "Official readings and a multi-day outdoor-practice outlook for every monitoring station.",
     updated: (when: string) => `Data ${when}`,
+    lastViewed: (name: string) => `Your last station: ${name}`,
     statReporting: "Reporting right now",
     statReportingNote: (total: number) => `of ${total} stations`,
     statAbove: "At or above the health threshold",
