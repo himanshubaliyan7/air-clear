@@ -1,7 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Activity, CalendarCheck, CalendarX, Search, TriangleAlert } from "lucide-react";
-import { lazy, Suspense, useMemo, useState, type ReactNode } from "react";
+import {
+  Activity,
+  ArrowRight,
+  CalendarCheck,
+  CalendarX,
+  Search,
+  TriangleAlert,
+} from "lucide-react";
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { overviewQuery } from "@/api/queries";
 import { useRegion } from "@/region/region-context";
 import {
@@ -17,7 +24,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { strings } from "@/i18n/strings";
 import { control, dashboard, surface, typography } from "@/design/tokens";
 import { swatchStyle } from "@/lib/category-color";
-import { regionBounds } from "@/lib/dashboard";
+import { browserStorage, readRememberedStation, regionBounds } from "@/lib/dashboard";
 import {
   NO_DATA_FILTER,
   SORT_MODES,
@@ -130,6 +137,14 @@ function RegionOverview() {
   );
   const bounds = useMemo(() => regionBounds(region.bbox), [region]);
 
+  // The station this visitor opened last, read after mount: the server cannot know it.
+  const [lastStationId, setLastStationId] = useState<string | null>(null);
+  useEffect(() => {
+    const remembered = readRememberedStation(browserStorage());
+    setLastStationId(remembered?.regionId === regionId ? remembered.stationId : null);
+  }, [regionId]);
+  const lastStation = summaries.find((station) => station.stationId === lastStationId) ?? null;
+
   const setSearch = (patch: Partial<StationSearch>) =>
     void navigate({ search: (prev) => ({ ...prev, ...patch }), replace: true });
   const openStation = (stationId: string) =>
@@ -152,6 +167,18 @@ function RegionOverview() {
           {data && <> {strings.overview.updated(regionContext.formatAsOf(data.generated_at))}.</>}
         </p>
       </header>
+
+      {lastStation && (
+        <Link
+          to="/r/$regionId/s/$stationId"
+          params={{ regionId, stationId: lastStation.stationId }}
+          search={{}}
+          className={control.button}
+        >
+          {strings.overview.lastViewed(lastStation.name)}
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
+        </Link>
+      )}
 
       {isPending && <OverviewSkeleton />}
       {error && <ErrorState error={error} onRetry={() => void refetch()} />}
