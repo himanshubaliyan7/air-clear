@@ -7,7 +7,14 @@ import type { AqiCategory, CurrentAqi, ExceedanceSummary, History, Region } from
 import { Attribution } from "@/components/Attribution";
 import { TimeChart } from "@/components/charts/TimeChart";
 import { EmptyState } from "@/components/states";
-import { NO_DATA_COLOR, categoryColor, rgbCss, swatchStyle } from "@/lib/category-color";
+import {
+  NO_DATA_COLOR,
+  categoryColor,
+  rankColor,
+  rgbCss,
+  rgbaCss,
+  swatchStyle,
+} from "@/lib/category-color";
 import type { NearbyStation } from "@/lib/dashboard";
 import { pollutantDetail, responseZone } from "@/lib/forecast-detail";
 import {
@@ -26,7 +33,14 @@ import {
 } from "@/lib/station-overview";
 import type { RegionContextValue } from "@/region/region-context";
 import { strings } from "@/i18n/strings";
-import { dashboard, recommendationTone, surface, typography } from "@/design/tokens";
+import {
+  dashboard,
+  recommendationTone,
+  surface,
+  typography,
+  verdictChip,
+  verdictFill,
+} from "@/design/tokens";
 
 export function CategorySwatch({
   id,
@@ -78,40 +92,82 @@ export function NowTile({
   }
 
   const category = regionContext.describeCategory(reading.overall?.category);
+  const color = categoryColor(reading.overall?.category, regionContext.categories);
+  const categoryLabel = category?.label ?? reading.overall?.category ?? "";
   return (
     <>
       {reading.overall ? (
-        <>
-          <div
-            className={dashboard.heroBar}
-            style={swatchStyle(categoryColor(reading.overall.category, regionContext.categories))}
-            aria-hidden="true"
-          />
-          <p className="flex flex-wrap items-baseline gap-x-3">
-            <span className={dashboard.heroValue}>
-              {category?.label ?? reading.overall.category}
+        <div
+          className={dashboard.heroPanel}
+          style={{ backgroundColor: rgbaCss(color, 0.12), borderColor: rgbaCss(color, 0.45) }}
+        >
+          <p className="flex flex-wrap items-end gap-x-3 gap-y-1">
+            <span className={dashboard.heroIndex}>
+              <span className="sr-only">{strings.current.overallLabel} </span>
+              {formatNumber(reading.overall.aqi)}
             </span>
-            <span className={`${typography.body} ${surface.muted}`}>
-              {strings.dashboard.indexValue(formatNumber(reading.overall.aqi))}
+            <span className="pb-1">
+              <span className={`flex items-center gap-2 ${dashboard.heroValue}`}>
+                <span className={dashboard.swatch} style={swatchStyle(color)} aria-hidden="true" />
+                {categoryLabel}
+              </span>
+              <span className={`${typography.small} ${surface.muted}`}>
+                {strings.dashboard.drivenBy(formatPollutantId(reading.overall.driver))}
+              </span>
             </span>
           </p>
-        </>
+          <CategoryScale
+            categories={regionContext.categories}
+            activeRank={category?.rank ?? null}
+            activeLabel={categoryLabel}
+          />
+        </div>
       ) : (
         <p className={typography.body}>{strings.current.overallUnavailable}</p>
       )}
-      <p className="mt-2 text-base font-medium">
+      <p className="mt-3 text-sm font-medium leading-relaxed">
         {currentThresholdMessage(reading.at_or_above_health_threshold)}
       </p>
       <p className={`${typography.small} ${surface.muted} mt-2`}>
         {asOf}
-        {reading.overall && (
-          <> · {strings.dashboard.drivenBy(formatPollutantId(reading.overall.driver))}</>
-        )}
         {" · "}
         {reading.aqi_standard ?? regionContext.aqiStandard}
       </p>
       <Attribution text={reading.attribution} />
     </>
+  );
+}
+
+/**
+ * The region's categories as a strip, best to worst, with the current one raised.
+ * Segments are equal: the API gives the order of the categories, not their bounds.
+ */
+function CategoryScale({
+  categories,
+  activeRank,
+  activeLabel,
+}: {
+  categories: readonly AqiCategory[];
+  activeRank: number | null;
+  activeLabel: string;
+}) {
+  if (categories.length < 2) return null;
+  return (
+    <div role="img" aria-label={strings.dashboard.scaleLabel(activeLabel)}>
+      <div className={dashboard.scale}>
+        {categories.map((category, rank) => (
+          <span
+            key={category.id}
+            className={rank === activeRank ? dashboard.scaleSegmentActive : dashboard.scaleSegment}
+            style={swatchStyle(rankColor(rank, categories.length))}
+          />
+        ))}
+      </div>
+      <div className={dashboard.scaleLabels} aria-hidden="true">
+        <span>{strings.dashboard.scaleBest}</span>
+        <span>{strings.dashboard.scaleWorst}</span>
+      </div>
+    </div>
   );
 }
 
@@ -130,6 +186,13 @@ export function PollutantTiles({
   if (measured.length === 0) {
     return <p className={typography.body}>{strings.current.noCurrentReading}</p>;
   }
+  // One scale for every tile, so the bars can be compared with each other.
+  const scaleMax = Math.max(
+    1,
+    ...measured.map((item) => item.sub_index_max ?? item.sub_index_avg ?? 0),
+  );
+  const percent = (value: number | null) =>
+    Math.min(100, Math.max(0, ((value ?? 0) / scaleMax) * 100));
   return (
     <>
       <ul className={dashboard.pollutantGrid}>
@@ -148,7 +211,19 @@ export function PollutantTiles({
               {regionContext.describeCategory(item.category)?.label ??
                 strings.common.notAvailableShort}
             </p>
-            <p className={`${typography.small} ${surface.muted}`}>
+            {item.sub_index_min !== null && item.sub_index_max !== null && (
+              <div className={dashboard.rangeTrack} aria-hidden="true">
+                <span
+                  className={dashboard.rangeFill}
+                  style={{
+                    ...swatchStyle(categoryColor(item.category, regionContext.categories)),
+                    left: `${percent(item.sub_index_min)}%`,
+                    width: `${Math.max(4, percent(item.sub_index_max) - percent(item.sub_index_min))}%`,
+                  }}
+                />
+              </div>
+            )}
+            <p className={`${typography.small} ${surface.muted} mt-1`}>
               {strings.dashboard.pollutantRange(
                 formatNumber(item.sub_index_min),
                 formatNumber(item.sub_index_max),
@@ -181,8 +256,14 @@ export function OutlookTile({
   return (
     <div className="space-y-3">
       {view.isCurrent ? (
-        <div className={`rounded-md p-3 ${recommendationTone[view.recommendation.tone]}`}>
-          <p className="text-lg font-semibold">{view.recommendation.label}</p>
+        <div className={`rounded-xl p-4 ${recommendationTone[view.recommendation.tone]}`}>
+          <p className="flex items-center gap-2 text-xl font-semibold tracking-tight">
+            <span
+              className={`h-2.5 w-2.5 shrink-0 rounded-full ${verdictFill[view.recommendation.tone]}`}
+              aria-hidden="true"
+            />
+            {view.recommendation.label}
+          </p>
           <p className={typography.body}>{view.recommendation.description}</p>
           {daily && !view.recommendation.isUnknown && (
             <p className={`${typography.small} ${surface.muted} mt-1`}>
@@ -196,7 +277,7 @@ export function OutlookTile({
           )}
         </div>
       ) : (
-        <div className={`rounded-md p-3 ${recommendationTone.unknown}`}>
+        <div className={`rounded-xl p-4 ${recommendationTone.unknown}`}>
           <p className="text-lg font-semibold">{strings.outlook.noCurrentForecast}</p>
           <p className={`${typography.body} ${surface.muted}`}>
             {view.state === "stale"
@@ -219,40 +300,66 @@ export function OutlookTile({
         <p className={`${typography.small} ${surface.muted}`}>{strings.outlook.partialDaysNote}</p>
       )}
       {view.hasDays && (
-        <ul className="divide-y divide-border">
+        <ul className={dashboard.dayStrip}>
           {data.days.map((day) => {
             const verdict = describeDayVerdict(data, day);
+            const upper = formatNumber(day.worst_case_value, { maximumFractionDigits: 0 });
             return (
-              <li key={day.date} className="py-2">
-                <p className="flex items-center gap-2 text-sm">
-                  <CategorySwatch id={day.aqi_category} categories={regionContext.categories} />
-                  <span className="w-24 shrink-0 font-medium">
+              <li key={day.date} className={dashboard.dayCard}>
+                <span
+                  className={dashboard.dayBar}
+                  style={swatchStyle(categoryColor(day.aqi_category, regionContext.categories))}
+                  aria-hidden="true"
+                />
+                <div className="min-w-0 flex-1 sm:flex-none">
+                  <p className={dashboard.dayName}>
                     {regionContext.formatDay(day.date) ?? day.date}
-                  </span>
-                  <span>
+                  </p>
+                  <p className={`${typography.small} ${surface.muted}`}>
                     {regionContext.describeCategory(day.aqi_category)?.label ?? day.aqi_category}
-                  </span>
-                  {verdict && <span className="ml-auto font-medium">{verdict.label}</span>}
-                </p>
-                <p className={`${typography.small} ${surface.muted} pl-5`}>
+                  </p>
+                </div>
+                <div className="text-right sm:text-left">
                   {daily ? (
                     <>
-                      {strings.dashboard.dayExpectedMean(concentration(day.expected_value))}
-                      {" · "}
-                      {strings.dashboard.dayCouldReach(
-                        formatNumber(day.worst_case_value, { maximumFractionDigits: 0 }),
-                      )}
+                      <p className={dashboard.dayValue}>
+                        <span className="sr-only">
+                          {strings.dashboard.dayExpectedMean(concentration(day.expected_value))}
+                        </span>
+                        <span aria-hidden="true">
+                          {strings.dashboard.dayMeanShort(
+                            formatNumber(day.expected_value, { maximumFractionDigits: 0 }),
+                          )}
+                          {unit && (
+                            <span className={`${typography.small} ${surface.muted} font-normal`}>
+                              {" "}
+                              {unit}
+                            </span>
+                          )}
+                        </span>
+                      </p>
+                      <p className={`${typography.small} ${surface.muted}`}>
+                        {strings.dashboard.dayUpTo(upper)}
+                      </p>
                     </>
                   ) : (
                     <>
-                      {strings.dashboard.dayChance(formatPercent(day.exceedance_probability))}
-                      {" · "}
-                      {strings.dashboard.dayWorstCase(
-                        formatNumber(day.worst_case_value, { maximumFractionDigits: 0 }),
-                      )}
+                      <p className="text-sm font-medium">
+                        {strings.dashboard.dayChance(formatPercent(day.exceedance_probability))}
+                      </p>
+                      <p className={`${typography.small} ${surface.muted}`}>
+                        {strings.dashboard.dayWorstCase(upper)}
+                      </p>
                     </>
                   )}
-                </p>
+                </div>
+                {verdict && (
+                  <span
+                    className={`${dashboard.pill} shrink-0 self-center sm:self-start ${verdictChip[verdict.tone]}`}
+                  >
+                    {verdict.label}
+                  </span>
+                )}
               </li>
             );
           })}
@@ -316,6 +423,7 @@ export function HistoryTile({
             }
           : null
       }
+      area
       axisLabel={
         detail.unit
           ? strings.forecastDetail.unitLabel(detail.unit)

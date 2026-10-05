@@ -2,9 +2,10 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { regionsQuery } from "@/api/queries";
+import { AppHeader } from "@/components/AppHeader";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { strings } from "@/i18n/strings";
-import { control, surface, typography } from "@/design/tokens";
+import { control, shell, surface, typography } from "@/design/tokens";
 import { browserStorage, readRememberedStation } from "@/lib/dashboard";
 
 export const Route = createFileRoute("/")({
@@ -62,8 +63,9 @@ function RegionGateway() {
   }, [data, onlyRegionId, navigate]);
 
   return (
-    <main className={`${surface.page} min-h-screen p-4 sm:p-8`}>
-      <div className="mx-auto max-w-2xl space-y-4">
+    <div className={shell.page}>
+      <AppHeader />
+      <main className={shell.mainNarrow}>
         <h1 className={typography.pageTitle}>{strings.app.name}</h1>
 
         {isPending && <LoadingState />}
@@ -102,7 +104,7 @@ function RegionGateway() {
         )}
 
         {onlyRegionId && <LoadingState />}
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }

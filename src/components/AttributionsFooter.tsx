@@ -5,8 +5,9 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { attributionsQuery } from "@/api/queries";
+import { FooterLinks } from "@/components/AppHeader";
 import { strings } from "@/i18n/strings";
-import { surface, typography } from "@/design/tokens";
+import { shell, surface, typography } from "@/design/tokens";
 
 export function AttributionsFooter() {
   const { data } = useQuery(attributionsQuery());
@@ -14,8 +15,10 @@ export function AttributionsFooter() {
   return (
     <footer
       aria-label={strings.attributions.label}
-      className={`mx-auto max-w-4xl border-t border-border p-4 sm:px-6 ${typography.small} ${surface.muted}`}
+      className={`${shell.footer} space-y-3 ${typography.small} ${surface.muted}`}
     >
+      <FooterLinks />
+      <p>{strings.app.disclaimer}</p>
       <ul className="space-y-1">
         {data.map((item) => (
           <li key={item.id}>

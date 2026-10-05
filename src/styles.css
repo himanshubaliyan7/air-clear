@@ -46,6 +46,12 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-surface: var(--surface);
+  --color-tone-positive: var(--tone-positive);
+  --color-tone-warning: var(--tone-warning);
+  --color-tone-critical: var(--tone-critical);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -62,8 +68,8 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --radius: 0.875rem;
+  --background: oklch(0.982 0.006 247);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.129 0.042 264.695);
@@ -82,6 +88,13 @@
   --border: oklch(0.929 0.013 255.508);
   --input: oklch(0.929 0.013 255.508);
   --ring: oklch(0.704 0.04 256.788);
+  /* Brand accent, a page tint, and the three verdict tones. */
+  --brand: oklch(0.52 0.17 256);
+  --brand-foreground: oklch(0.985 0.003 247);
+  --surface: oklch(0.965 0.012 250);
+  --tone-positive: oklch(0.58 0.14 155);
+  --tone-warning: oklch(0.72 0.16 70);
+  --tone-critical: oklch(0.56 0.21 25);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -117,6 +130,12 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.551 0.027 264.364);
+  --brand: oklch(0.72 0.14 250);
+  --brand-foreground: oklch(0.16 0.04 265);
+  --surface: oklch(0.17 0.04 265);
+  --tone-positive: oklch(0.72 0.15 155);
+  --tone-warning: oklch(0.8 0.15 75);
+  --tone-critical: oklch(0.7 0.19 22);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -137,8 +156,43 @@
     border-color: var(--color-border);
   }
 
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* A soft wash behind the page header area; decoration only. */
+.page-wash {
+  background-image:
+    radial-gradient(60rem 24rem at 15% -10%, color-mix(in oklch, var(--brand) 14%, transparent), transparent 70%),
+    radial-gradient(48rem 20rem at 95% -5%, color-mix(in oklch, var(--tone-positive) 10%, transparent), transparent 70%);
+  background-repeat: no-repeat;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise-in {
+    animation: rise-in 0.35s ease-out both;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }

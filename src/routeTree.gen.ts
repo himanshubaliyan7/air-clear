@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as SubscribeRouteImport } from './routes/subscribe'
 import { Route as OperatorModelHealthRouteImport } from './routes/operator.model-health'
 import { Route as RRegionIdRouteImport } from './routes/r.$regionId'
@@ -24,6 +25,11 @@ import { Route as RRegionIdSStationIdForecastRouteImport } from './routes/r.$reg
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubscribeRoute = SubscribeRouteImport.update({
@@ -82,6 +88,7 @@ const RRegionIdSStationIdForecastRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/subscribe': typeof SubscribeRoute
   '/operator/model-health': typeof OperatorModelHealthRoute
   '/r/$regionId': typeof RRegionIdRouteWithChildren
@@ -95,6 +102,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/subscribe': typeof SubscribeRoute
   '/operator/model-health': typeof OperatorModelHealthRoute
   '/subscriptions/confirm': typeof SubscriptionsConfirmRoute
@@ -107,6 +115,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/subscribe': typeof SubscribeRoute
   '/operator/model-health': typeof OperatorModelHealthRoute
   '/r/$regionId': typeof RRegionIdRouteWithChildren
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/subscribe'
     | '/operator/model-health'
     | '/r/$regionId'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/subscribe'
     | '/operator/model-health'
     | '/subscriptions/confirm'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/subscribe'
     | '/operator/model-health'
     | '/r/$regionId'
@@ -160,6 +172,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   SubscribeRoute: typeof SubscribeRoute
   OperatorModelHealthRoute: typeof OperatorModelHealthRoute
   RRegionIdRoute: typeof RRegionIdRouteWithChildren
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/subscribe': {
@@ -279,6 +299,7 @@ const RRegionIdRouteWithChildren = RRegionIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   SubscribeRoute: SubscribeRoute,
   OperatorModelHealthRoute: OperatorModelHealthRoute,
   RRegionIdRoute: RRegionIdRouteWithChildren,

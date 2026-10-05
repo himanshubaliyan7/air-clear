@@ -7,7 +7,19 @@
 export const strings = {
   app: {
     name: "Air quality for outdoor practice",
+    shortName: "Air Clear",
+    tagline: "Outdoor-practice air quality for schools",
     skipToContent: "Skip to content",
+    navLabel: "Main",
+    navStations: "Stations",
+    navAbout: "How it works",
+    disclaimer:
+      "A non-commercial portfolio project. It is a decision aid, not medical advice; follow official advisories.",
+  },
+
+  theme: {
+    toDark: "Switch to dark theme",
+    toLight: "Switch to light theme",
   },
 
   common: {
@@ -39,8 +51,118 @@ export const strings = {
     serverBody: "Please try again in a moment.",
   },
 
+  overview: {
+    eyebrow: "Live overview",
+    subtitle:
+      "Official readings and a multi-day outdoor-practice outlook for every monitoring station.",
+    updated: (when: string) => `Data ${when}`,
+    statReporting: "Reporting right now",
+    statReportingNote: (total: number) => `of ${total} stations`,
+    statAbove: "At or above the health threshold",
+    statAboveNote: "stations right now, by the official index",
+    statVerdictNote: (withOutlook: number, pollutant: string) =>
+      `of ${withOutlook} stations with a ${pollutant} outlook`,
+    nowBarTitle: "Right now, by category",
+    outlookBarTitle: (pollutant: string) => `Next days, by verdict · ${pollutant}`,
+    barItem: (label: string, count: number) => `${label}: ${count}`,
+    lowestTitle: "Lowest index right now",
+    highestTitle: "Highest index right now",
+    rankEmpty: "No station has a current reading.",
+    stationsTitle: "All stations",
+    filterLabel: "Filter by category",
+    filterAll: "All",
+    sortLabel: "Sort stations",
+    sort: {
+      highest: "Highest index first",
+      lowest: "Lowest index first",
+      name: "Name",
+    },
+    noReading: "No reading",
+    nextDays: "Next days",
+    indexLabel: "Index",
+  },
+
+  about: {
+    title: "How this service works",
+    intro:
+      "A decision aid for schools: is outdoor practice a good idea near this monitoring station, today and over the next days? It shows two separate signals and never mixes them.",
+    signalsTitle: "Two signals, kept apart",
+    nowTitle: "Right now",
+    nowBody:
+      "The official air-quality index published for the station, refreshed every hour. A reading that is more than a few hours old is shown as no current reading.",
+    outlookTitle: "The next days",
+    outlookBody:
+      "An estimate of each day's mean concentration, graded on the official category scale. Below the health-threshold category a day reads Go, at that category Caution, and above it Not recommended.",
+    noDataTitle: "No data is never a clearance",
+    noDataBody:
+      "When a forecast is missing, old or incomplete, the page says so in grey. Silence is never shown as Go.",
+    pipelineTitle: "From sensor to verdict",
+    pipeline: [
+      {
+        title: "Collect",
+        body: "Hourly sensor readings, the official index feed and weather data are pulled on a schedule, with retries and rate limiting.",
+      },
+      {
+        title: "Clean",
+        body: "Units are converted on the way in, duplicate stations are merged, and physically impossible readings are rejected before anything is computed from them.",
+      },
+      {
+        title: "Estimate",
+        body: "Each of the next days is estimated from the station's last 24 hours and the day-to-day spread seen in a year of history: a low, an expected and a high value.",
+      },
+      {
+        title: "Grade",
+        body: "A day gets the worst category its mean reaches with at least a 40% chance. The verdict follows from that category.",
+      },
+      {
+        title: "Check",
+        body: "Every night, past estimates are scored against what was measured. A watchdog raises an alert when data stops arriving or coverage drops.",
+      },
+    ],
+    accuracyTitle: "How good is it?",
+    accuracyBody:
+      "Backtested on two held-out periods of the last pollution season. The grade was exactly right on about 6 in 10 days for tomorrow and about 5 in 10 for five days ahead. Days that turned out not recommended were called Go on 2–5% of days early in the season and 7–16% late in it.",
+    accuracyLimits:
+      "The estimate follows the air about a day behind, so it cannot foresee a sudden change. Several machine-learning models (gradient-boosted trees per station and pooled, with and without weather) were backtested against this simple rule. None did better, so the simpler and better-calibrated rule is the one in service.",
+    accuracyStats: [
+      { value: "≈ 61%", label: "exact grade, tomorrow" },
+      { value: "≈ 52%", label: "exact grade, five days ahead" },
+      { value: "2–5%", label: "bad days called Go, early season" },
+    ],
+    stackTitle: "Built with",
+    stack: [
+      "Python",
+      "Apache Airflow",
+      "PostgreSQL + TimescaleDB",
+      "FastAPI",
+      "LightGBM (backtests)",
+      "Docker Compose",
+      "Caddy",
+      "TypeScript",
+      "React + TanStack Start",
+      "Tailwind CSS",
+      "Cloudflare Workers",
+    ],
+    sourceTitle: "Source code",
+    sources: [
+      {
+        label: "Backend: ingestion, pipeline, API",
+        url: "https://github.com/himanshubaliyan7/air-pollution-backend",
+      },
+      { label: "Frontend: this site", url: "https://github.com/himanshubaliyan7/air-clear" },
+    ],
+    operatorLink: "Nightly evaluation results",
+    backHome: "Open the dashboard",
+  },
+
   dashboard: {
     changeStation: "Change station",
+    allStations: "All stations",
+    scaleLabel: (label: string) => `Category scale, best to worst. Now: ${label}.`,
+    scaleBest: "Best",
+    scaleWorst: "Worst",
+    dayMeanShort: (value: string) => `≈ ${value}`,
+    dayUpTo: (value: string) => `up to ${value}`,
     nowTitle: "Right now",
     indexValue: (value: string) => `Index ${value}`,
     drivenBy: (pollutant: string) => `Driven by ${pollutant}`,
@@ -121,7 +243,7 @@ export const strings = {
     sectionTitle: "Outlook",
     noneForStation: "No outlook is available for this station.",
     noneForStationWhy:
-      "An outlook needs hourly history that most stations do not have. This is normal.",
+      "An outlook needs measurements from the last 24 hours, and this station has not reported enough of them.",
     noCurrentForecast: "No current outlook.",
     lastForecastWas: (when: string) => `The last one was ${when}.`,
     neverForecast: "No outlook has ever been made for this station.",
@@ -171,8 +293,7 @@ export const strings = {
     clearSearch: "Clear search",
     coverage: (withReading: number, total: number, withForecast: number) =>
       `${withReading} of ${total} stations have a current reading; ${withForecast} have an outlook.`,
-    coverageWhy:
-      "An outlook needs hourly history that most stations do not have.",
+    coverageWhy: "An outlook needs measurements from the last 24 hours.",
     /** Availability markers. Written out in both directions, never colour-only. */
     hasCurrentReading: "Current reading available",
     noCurrentReading: "No current reading",

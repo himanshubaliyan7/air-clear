@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AttributionsFooter } from "../components/AttributionsFooter";
+import { THEME_INIT_SCRIPT } from "../lib/theme";
 
 function NotFoundComponent() {
   return (
@@ -90,6 +91,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    // Sets the theme class before the first paint (no light flash in dark mode).
+    scripts: [{ children: THEME_INIT_SCRIPT }],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -99,7 +102,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // The theme script may add a class to <html> before React hydrates it.
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

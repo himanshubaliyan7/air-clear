@@ -2,9 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { modelHealthQuery, regionsQuery, stationsQuery } from "@/api/queries";
+import { AppHeader } from "@/components/AppHeader";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { strings } from "@/i18n/strings";
-import { control, surface, typography } from "@/design/tokens";
+import { control, shell, surface, typography } from "@/design/tokens";
 import { formatAsOf } from "@/lib/format-time";
 import { formatPollutantId } from "@/lib/pollutants";
 import {
@@ -202,11 +203,14 @@ function ModelHealthPage() {
   }
 
   return (
-    <main className={`${surface.page} mx-auto max-w-6xl space-y-4 p-4`}>
-      <h1 className={typography.pageTitle}>{t.title}</h1>
-      <p role="note" className={`${surface.card} ${typography.body} font-medium`}>{t.operatorOnly}</p>
-      <p className={`${typography.body} ${surface.muted}`}>{t.intro}</p>
-      {body}
-    </main>
+    <div className={shell.page}>
+      <AppHeader />
+      <main className={shell.main}>
+        <h1 className={typography.pageTitle}>{t.title}</h1>
+        <p role="note" className={`${surface.card} ${typography.body} font-medium`}>{t.operatorOnly}</p>
+        <p className={`${typography.body} ${surface.muted}`}>{t.intro}</p>
+        {body}
+      </main>
+    </div>
   );
 }
