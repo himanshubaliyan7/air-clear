@@ -164,6 +164,7 @@ export const strings = {
     scaleWorst: "Worst",
     dayMeanShort: (value: string) => `≈ ${value}`,
     dayUpTo: (value: string) => `up to ${value}`,
+    dayIndex: (pollutant: string, value: string) => `${pollutant} index ${value}`,
     nowTitle: "Right now",
     indexValue: (value: string) => `Index ${value}`,
     drivenBy: (pollutant: string) => `Driven by ${pollutant}`,
@@ -257,6 +258,8 @@ export const strings = {
       `Covers the next ${days} day${days === 1 ? "" : "s"}; the worst day decides.`,
     estimateNote:
       "An estimate, not a measurement. Each day is graded by the mean expected over the whole day, so single hours can be higher. A sudden change cannot be foreseen.",
+    indexNote: (pollutant: string) =>
+      `The ${pollutant} index is for that pollutant alone, so it can be lower than the overall index of a current reading, which follows the worst pollutant.`,
     dayDate: "Day",
     dayCategory: "Category",
     dayProbability: "Chance of exceeding",

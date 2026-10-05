@@ -239,6 +239,10 @@ export function PollutantTiles({
   );
 }
 
+function hasValue(value: number | null | undefined): value is number {
+  return value !== null && value !== undefined;
+}
+
 /** The outlook verdict and its days. */
 export function OutlookTile({
   data,
@@ -341,6 +345,14 @@ export function OutlookTile({
                       <p className={`${typography.small} ${surface.muted}`}>
                         {strings.dashboard.dayUpTo(upper)}
                       </p>
+                      {hasValue(day.expected_sub_index) && (
+                        <p className={`${typography.small} mt-1 font-medium ${typography.number}`}>
+                          {strings.dashboard.dayIndex(
+                            formatPollutantId(data.pollutant),
+                            formatNumber(day.expected_sub_index),
+                          )}
+                        </p>
+                      )}
                     </>
                   ) : (
                     <>
@@ -366,7 +378,12 @@ export function OutlookTile({
         </ul>
       )}
       {daily && view.hasDays && (
-        <p className={`${typography.small} ${surface.muted}`}>{strings.outlook.estimateNote}</p>
+        <p className={`${typography.small} ${surface.muted}`}>
+          {strings.outlook.estimateNote}
+          {data.days.some((day) => hasValue(day.expected_sub_index)) && (
+            <> {strings.outlook.indexNote(formatPollutantId(data.pollutant))}</>
+          )}
+        </p>
       )}
     </div>
   );
