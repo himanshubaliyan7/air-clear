@@ -453,6 +453,8 @@ export interface components {
             verdict?: string | null;
             /** Expected Value */
             expected_value?: number | null;
+            /** Expected Sub Index */
+            expected_sub_index?: number | null;
         };
         /** ExceedanceSummaryOut */
         ExceedanceSummaryOut: {
