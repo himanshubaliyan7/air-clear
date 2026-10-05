@@ -17,6 +17,8 @@ export interface StationGlance {
   lon: number;
   /** False when there is no current reading with a category the region lists. */
   hasValue: boolean;
+  /** The category's id as the API gave it, or null without a value. */
+  categoryId: string | null;
   /** The category's label, or null without a value. */
   categoryLabel: string | null;
   indexValue: number | null;
@@ -44,6 +46,7 @@ export function stationGlance(
     return {
       ...base,
       hasValue: false,
+      categoryId: null,
       categoryLabel: null,
       indexValue: null,
       color: NO_DATA_COLOR,
@@ -52,6 +55,7 @@ export function stationGlance(
   return {
     ...base,
     hasValue: true,
+    categoryId: view.id,
     categoryLabel: view.label,
     indexValue: current.overall.aqi,
     color: rankColor(view.rank, categories.length),

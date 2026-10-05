@@ -39,6 +39,8 @@ export interface TimeChartProps {
   lines: ChartLine[];
   band?: { label: string; points: BandPoint[] } | undefined;
   threshold?: { value: number; label: string } | null | undefined;
+  /** Shade the area under the first line, down to the bottom of the plot. */
+  area?: boolean | undefined;
   axisLabel: string;
   formatTick: (x: number) => string;
   formatValue: (v: number) => string;
@@ -49,7 +51,7 @@ const HEIGHT = 260;
 const PAD = { top: 16, right: 16, bottom: 32, left: 52 };
 
 export function TimeChart(props: TimeChartProps) {
-  const { title, summary, xs, lines, band, threshold, axisLabel } = props;
+  const { title, summary, xs, lines, band, threshold, area, axisLabel } = props;
   const wrapRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(640);
   const [active, setActive] = useState<number | null>(null);
@@ -186,6 +188,17 @@ export function TimeChart(props: TimeChartProps) {
                 }
               />
             ))}
+          {area &&
+            lines[0] &&
+            segments(lines[0].points)
+              .filter((run) => run.length > 1)
+              .map((run, i) => (
+                <path
+                  key={`a${i}`}
+                  className={chart.area}
+                  d={`${pathFor(run)} L${layout.x(run[run.length - 1]!.x).toFixed(1)},${HEIGHT - PAD.bottom} L${layout.x(run[0]!.x).toFixed(1)},${HEIGHT - PAD.bottom} Z`}
+                />
+              ))}
           {threshold && (
             <line
               x1={PAD.left}

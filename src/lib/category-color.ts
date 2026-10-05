@@ -51,3 +51,28 @@ export function rgbCss(color: Rgb): string {
 export function swatchStyle(color: Rgb): { backgroundColor: string } {
   return { backgroundColor: rgbCss(color) };
 }
+
+/** The colour at a given opacity, for a tinted background behind a category. */
+export function rgbaCss(color: Rgb, alpha: number): string {
+  return `rgb(${color[0]} ${color[1]} ${color[2]} / ${alpha})`;
+}
+
+/**
+ * Black or white, whichever reads better on the colour (WCAG relative luminance).
+ * The ramp runs from light yellows to a dark maroon, so one text colour cannot serve.
+ */
+export function readableTextOn(color: Rgb): "#111827" | "#ffffff" {
+  const channel = (value: number) => {
+    const c = value / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  };
+  const luminance =
+    0.2126 * channel(color[0]) + 0.7152 * channel(color[1]) + 0.0722 * channel(color[2]);
+  // Contrast against near-black (0.012) and white (1.0); pick the larger.
+  return (luminance + 0.05) / 0.062 >= 1.05 / (luminance + 0.05) ? "#111827" : "#ffffff";
+}
+
+/** Inline style for a solid badge in a category's colour. */
+export function badgeStyle(color: Rgb): { backgroundColor: string; color: string } {
+  return { backgroundColor: rgbCss(color), color: readableTextOn(color) };
+}

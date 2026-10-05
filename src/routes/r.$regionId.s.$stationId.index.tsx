@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   currentAqiQuery,
@@ -165,9 +166,21 @@ function StationDashboard() {
       {station && (
         <>
           <header className="flex flex-wrap items-end justify-between gap-3">
-            <div>
+            <div className="min-w-0 space-y-1">
+              <Link
+                to="/r/$regionId"
+                params={{ regionId }}
+                search={{}}
+                className={`${dashboard.link} inline-flex items-center gap-1`}
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+                {strings.dashboard.allStations}
+              </Link>
               <h1 className={typography.pageTitle}>{station.name}</h1>
-              <p className={`${typography.body} ${surface.muted}`}>{station.city}</p>
+              <p className={`flex items-center gap-1 ${typography.body} ${surface.muted}`}>
+                <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+                {station.city}
+              </p>
             </div>
             <Link to="/r/$regionId" params={{ regionId }} search={{}} className={control.button}>
               {strings.dashboard.changeStation}
