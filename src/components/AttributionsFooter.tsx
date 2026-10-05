@@ -5,7 +5,6 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { attributionsQuery } from "@/api/queries";
-import { FooterLinks } from "@/components/AppHeader";
 import { strings } from "@/i18n/strings";
 import { shell, surface, typography } from "@/design/tokens";
 
@@ -17,7 +16,6 @@ export function AttributionsFooter() {
       aria-label={strings.attributions.label}
       className={`${shell.footer} space-y-3 ${typography.small} ${surface.muted}`}
     >
-      <FooterLinks />
       <p>{strings.app.disclaimer}</p>
       <ul className="space-y-1">
         {data.map((item) => (

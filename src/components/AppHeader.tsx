@@ -1,6 +1,9 @@
 /**
  * The header every screen shares: the name, the main links and the theme switch.
  * The region is optional because some pages (email links, the explainer) carry none.
+ *
+ * On a phone the links do not fit beside the name, so they form a second row of
+ * the header, always in view, instead of being tucked away at the foot of the page.
  */
 import { Link } from "@tanstack/react-router";
 import { Moon, Sun, Wind } from "lucide-react";
@@ -41,6 +44,48 @@ function ThemeToggle() {
   );
 }
 
+/** The main links, once; the caller decides how each one looks. */
+function NavLinks({
+  regionId,
+  linkClass,
+}: {
+  regionId?: string | undefined;
+  linkClass: string;
+}) {
+  const active = { className: shell.navLinkActive };
+  return (
+    <>
+      {regionId ? (
+        <Link
+          to="/r/$regionId"
+          params={{ regionId }}
+          search={{}}
+          className={linkClass}
+          activeOptions={{ exact: true }}
+          activeProps={active}
+        >
+          {strings.app.navStations}
+        </Link>
+      ) : (
+        <Link to="/" className={linkClass} activeOptions={{ exact: true }} activeProps={active}>
+          {strings.app.navStations}
+        </Link>
+      )}
+      <Link to="/about" className={linkClass} activeProps={active}>
+        {strings.app.navAbout}
+      </Link>
+      <Link
+        to="/subscribe"
+        search={regionId ? { region: regionId } : {}}
+        className={linkClass}
+        activeProps={active}
+      >
+        {strings.subscriptions.navLink}
+      </Link>
+    </>
+  );
+}
+
 export function AppHeader({
   regionId,
   children,
@@ -63,56 +108,18 @@ export function AppHeader({
           </span>
         </Link>
 
-        <nav className={shell.nav} aria-label={strings.app.navLabel}>
-          {regionId && (
-            <Link
-              to="/r/$regionId"
-              params={{ regionId }}
-              search={{}}
-              className={`${shell.navLink} hidden md:inline-flex`}
-              activeOptions={{ exact: true }}
-              activeProps={{ className: shell.navLinkActive }}
-            >
-              {strings.app.navStations}
-            </Link>
-          )}
-          <Link
-            to="/about"
-            className={`${shell.navLink} hidden sm:inline-flex`}
-            activeProps={{ className: shell.navLinkActive }}
-          >
-            {strings.app.navAbout}
-          </Link>
-          <Link
-            to="/subscribe"
-            search={regionId ? { region: regionId } : {}}
-            className={`${shell.navLink} hidden sm:inline-flex`}
-            activeProps={{ className: shell.navLinkActive }}
-          >
-            {strings.subscriptions.navLink}
-          </Link>
+        <div className={shell.nav}>
+          <nav className={shell.navWide} aria-label={strings.app.navLabel}>
+            <NavLinks regionId={regionId} linkClass={shell.navLink} />
+          </nav>
           {children}
           <ThemeToggle />
-        </nav>
+        </div>
       </div>
-    </header>
-  );
-}
 
-/** The links the header hides on a phone, repeated at the foot of the page. */
-export function FooterLinks({ regionId }: { regionId?: string | undefined }) {
-  return (
-    <nav className="flex flex-wrap gap-x-4 gap-y-1 sm:hidden" aria-label={strings.app.navLabel}>
-      <Link to="/about" className="underline underline-offset-2">
-        {strings.app.navAbout}
-      </Link>
-      <Link
-        to="/subscribe"
-        search={regionId ? { region: regionId } : {}}
-        className="underline underline-offset-2"
-      >
-        {strings.subscriptions.navLink}
-      </Link>
-    </nav>
+      <nav className={shell.navPhone} aria-label={strings.app.navLabel}>
+        <NavLinks regionId={regionId} linkClass={shell.navPhoneLink} />
+      </nav>
+    </header>
   );
 }
