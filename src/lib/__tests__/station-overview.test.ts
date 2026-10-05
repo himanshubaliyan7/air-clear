@@ -3,7 +3,9 @@ import type { CurrentAqi, ExceedanceSummary } from "@/api/types";
 import {
   currentReadingState,
   currentThresholdMessage,
+  describeDayVerdict,
   describeOutlook,
+  isDailyMean,
 } from "@/lib/station-overview";
 
 function current(partial: Partial<CurrentAqi> = {}): CurrentAqi {
@@ -29,6 +31,7 @@ function outlook(partial: Partial<ExceedanceSummary> = {}): ExceedanceSummary {
     days: [],
     forecast_made_at: "2026-09-21T06:00:00Z",
     is_current: true,
+    target: "hourly",
     overall_recommendation: "no-data",
     ...partial,
   };
@@ -106,5 +109,37 @@ describe("outlook currentness", () => {
       outlook({ is_current: false, overall_recommendation: "go" }),
     );
     expect(view.isCurrent).toBe(false);
+  });
+});
+
+describe("daily-mean day verdicts", () => {
+  it("recognises only the daily-mean target", () => {
+    expect(isDailyMean("daily_mean")).toBe(true);
+    expect(isDailyMean("hourly")).toBe(false);
+    expect(isDailyMean(undefined)).toBe(false);
+  });
+
+  it("passes the server's verdict for a day through unchanged", () => {
+    const summary = { is_current: true, target: "daily_mean" };
+    expect(describeDayVerdict(summary, { verdict: "go" })?.value).toBe("go");
+    expect(describeDayVerdict(summary, { verdict: "caution" })?.value).toBe("caution");
+    expect(describeDayVerdict(summary, { verdict: "no-go" })?.value).toBe("no-go");
+  });
+
+  it("gives a day no verdict when the outlook is not current", () => {
+    const summary = { is_current: false, target: "daily_mean" };
+    expect(describeDayVerdict(summary, { verdict: "go" })).toBeNull();
+  });
+
+  it("gives a day no verdict for the hourly target or when the server sent none", () => {
+    expect(describeDayVerdict({ is_current: true, target: "hourly" }, { verdict: "go" })).toBeNull();
+    expect(describeDayVerdict({ is_current: true, target: "daily_mean" }, { verdict: null })).toBeNull();
+    expect(describeDayVerdict({ is_current: true, target: "daily_mean" }, {})).toBeNull();
+  });
+
+  it("never turns an unknown verdict into a clearance", () => {
+    const view = describeDayVerdict({ is_current: true, target: "daily_mean" }, { verdict: "all-clear" });
+    expect(view?.isPositive).toBe(false);
+    expect(view?.isUnknown).toBe(true);
   });
 });

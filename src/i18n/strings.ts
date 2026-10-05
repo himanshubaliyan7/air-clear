@@ -47,6 +47,8 @@ export const strings = {
     outlookTitle: "Next days",
     dayChance: (chance: string) => `${chance} chance of exceeding`,
     dayWorstCase: (value: string) => `worst case ${value}`,
+    dayExpectedMean: (value: string) => `mean of the day about ${value}`,
+    dayCouldReach: (value: string) => `could reach ${value}`,
     pollutantsTitle: "Pollutants right now",
     pollutantRange: (low: string, high: string) => `Range ${low}–${high}`,
     historyTitle: (pollutant: string) => `${pollutant}: last 48 hours`,
@@ -128,6 +130,10 @@ export const strings = {
       "The days below come from that older forecast run and are for information only.",
     partialDaysNote:
       "Some days are missing from this forecast run, so no overall outlook can be given. The days below are for information only.",
+    overallCovers: (days: number) =>
+      `Covers the next ${days} day${days === 1 ? "" : "s"}; the worst day decides.`,
+    estimateNote:
+      "An estimate, not a measurement. Each day is graded by the mean expected over the whole day, so single hours can be higher. A sudden change cannot be foreseen.",
     dayDate: "Day",
     dayCategory: "Category",
     dayProbability: "Chance of exceeding",
@@ -206,7 +212,14 @@ export const strings = {
     forecastTitle: "Forecast",
     forecastSummary: (n: number, unit: string) =>
       `Expected value with its likely low-to-high range for ${n} forecast times, in ${unit}.`,
+    dailyForecastSummary: (n: number, unit: string) =>
+      `Expected mean of each day with its likely low-to-high range for ${n} day${n === 1 ? "" : "s"}, in ${unit}.`,
+    dailyNote:
+      "Each point is the mean expected over one whole day. It is an estimate; single hours can be higher or lower.",
     expected: "Expected value",
+    expectedDayMean: "Expected mean of the day",
+    day: "Day",
+    daysAhead: "Days ahead",
     range: "Likely range (low to high)",
     low: "Low",
     high: "High",
@@ -226,8 +239,13 @@ export const strings = {
     historyTitle: "Past forecasts compared with measurements",
     historySummary: (days: number, unit: string) =>
       `Measured values and what was forecast over the last ${days} days, in ${unit}. Gaps mean no value.`,
+    dailyHistorySummary: (days: number, unit: string) =>
+      `Hourly measured values and the mean that was forecast for each day over the last ${days} days, in ${unit}. Gaps mean no value.`,
+    dailyHistoryNote:
+      "The forecast is one value per day, the mean expected for that day, so its line is flat within a day while the hourly measurements move around it.",
     actual: "Measured",
     forecastValue: "Forecast",
+    forecastDayMean: "Forecast mean of the day",
     lookbackLabel: "Period",
     lookbackOption: (days: number) => `Last ${days} days`,
     noHistoryPoints: "No history was returned for this period.",

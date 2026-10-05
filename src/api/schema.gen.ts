@@ -422,7 +422,19 @@ export interface components {
             /** Attribution */
             attribution: string;
         };
-        /** ExceedanceDayOut */
+        /**
+         * ExceedanceDayOut
+         * @description One calendar day. What the values describe depends on the summary's `target`.
+         *
+         *     "daily_mean" (graded verdicts, owner decision 2026-10-02): everything is about the day's
+         *     MEAN concentration. aqi_category is the worst category that mean reaches with the service's
+         *     decision probability, and verdict follows from it: go below the region's health-threshold
+         *     category, caution in it, no-go from the next one up.
+         *
+         *     "hourly": the day is represented by ONE forecast hour (the run's anchor hour + N x 24 h).
+         *     exceedance_flag is true when that hour is likely above the health threshold, and
+         *     aqi_category is the category of its upper quantile.
+         */
         ExceedanceDayOut: {
             /**
              * Date
@@ -437,6 +449,10 @@ export interface components {
             worst_case_value: number;
             /** Aqi Category */
             aqi_category: string;
+            /** Verdict */
+            verdict?: string | null;
+            /** Expected Value */
+            expected_value?: number | null;
         };
         /** ExceedanceSummaryOut */
         ExceedanceSummaryOut: {
@@ -453,6 +469,11 @@ export interface components {
              * @default false
              */
             is_current: boolean;
+            /**
+             * Target
+             * @default hourly
+             */
+            target: string;
             /** Days */
             days: components["schemas"]["ExceedanceDayOut"][];
             /** Overall Recommendation */
@@ -493,6 +514,11 @@ export interface components {
              * @default false
              */
             is_current: boolean;
+            /**
+             * Target
+             * @default hourly
+             */
+            target: string;
             /** Forecasts */
             forecasts: components["schemas"]["ForecastPointOut"][];
         };
@@ -509,6 +535,11 @@ export interface components {
             pollutant: string;
             /** Timezone */
             timezone?: string | null;
+            /**
+             * Target
+             * @default hourly
+             */
+            target: string;
             /** Points */
             points: components["schemas"]["HistoryPointOut"][];
         };
