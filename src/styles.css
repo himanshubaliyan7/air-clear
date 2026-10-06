@@ -189,6 +189,11 @@
     overflow-x: clip;
   }
 
+  /* Checkboxes and radios follow the theme instead of the browser's blue. */
+  input {
+    accent-color: var(--color-foreground);
+  }
+
   ::selection {
     background-color: var(--color-foreground);
     color: var(--color-background);
@@ -286,3 +291,56 @@
 @keyframes pop { from { scale: 0; } }
 @keyframes slide-up { from { bottom: 0; } }
 @keyframes bar-grow { from { transform: scaleY(0); } }
+
+/*
+ * The map's base layer is muted so the station dots, which carry the category
+ * colours, are the only colour on it. The filter is on the tile pane alone.
+ */
+.leaflet-container {
+  background: var(--color-muted);
+  font-family: var(--font-mono);
+  outline-offset: 0;
+}
+.leaflet-tile-pane {
+  filter: grayscale(1) contrast(0.9);
+}
+.dark .leaflet-tile-pane {
+  filter: grayscale(1) invert(1) contrast(0.85) brightness(0.8);
+}
+.leaflet-container .leaflet-bar,
+.leaflet-container .leaflet-bar a,
+.leaflet-container.leaflet-touch .leaflet-bar,
+.leaflet-container.leaflet-touch .leaflet-bar a {
+  border-radius: 0;
+  box-shadow: none;
+}
+.leaflet-container .leaflet-bar,
+.leaflet-container.leaflet-touch .leaflet-bar {
+  border: 1px solid var(--color-border);
+}
+.leaflet-container .leaflet-bar a,
+.leaflet-container .leaflet-bar a:hover,
+.leaflet-container .leaflet-bar a:focus {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  border-bottom-color: var(--color-border);
+}
+.leaflet-container .leaflet-bar a:hover,
+.leaflet-container .leaflet-bar a:focus {
+  background-color: var(--color-muted);
+}
+.leaflet-container .leaflet-bar a.leaflet-disabled {
+  background-color: var(--color-background);
+  color: var(--color-muted-foreground);
+}
+.leaflet-container .leaflet-control-container .leaflet-control-attribution {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  border-top: 1px solid var(--color-border);
+  border-left: 1px solid var(--color-border);
+  border-radius: 0;
+}
+.leaflet-container .leaflet-control-container .leaflet-control-attribution a {
+  color: var(--color-foreground);
+  text-decoration: underline;
+}
