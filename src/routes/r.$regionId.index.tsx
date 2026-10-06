@@ -4,6 +4,7 @@ import { ArrowRight, Search } from "lucide-react";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { overviewHistoryQuery, overviewQuery } from "@/api/queries";
 import type { ExceedanceSummary, OverviewHistoryStation } from "@/api/types";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useRegion } from "@/region/region-context";
 import { CategoryBar, OverviewSkeleton, StatCell, VerdictBar } from "@/components/dashboard/overview";
 import { CategoryLegend, NoDataSwatch } from "@/components/dashboard/tiles";
@@ -83,6 +84,7 @@ function RegionOverview() {
   const navigate = Route.useNavigate();
   const regionContext = useRegion();
   const { region, categories, pollutants } = regionContext;
+  useDocumentTitle(region.name, strings.app.navStations);
   const [mapOpen, setMapOpen] = useState(false);
   const { data, isPending, error, refetch } = useQuery(overviewQuery(regionId));
 
@@ -122,8 +124,7 @@ function RegionOverview() {
   // The station this visitor opened last, read after mount: the server cannot know it.
   const [lastStationId, setLastStationId] = useState<string | null>(null);
   useEffect(() => {
-    const remembered = readRememberedStation(browserStorage());
-    setLastStationId(remembered?.regionId === regionId ? remembered.stationId : null);
+    setLastStationId(readRememberedStation(browserStorage(), regionId)?.stationId ?? null);
   }, [regionId]);
   const lastStation = summaries.find((station) => station.stationId === lastStationId) ?? null;
 

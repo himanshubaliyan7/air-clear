@@ -1,7 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
+import { regionsQuery } from "@/api/queries";
 import { AppHeader } from "@/components/AppHeader";
 import { Lines } from "@/components/instrument/primitives";
+import { regionAccuracy } from "@/lib/regions";
 import { headlineLines } from "@/lib/timeline";
 import { strings } from "@/i18n/strings";
 import { control, dashboard, shell, surface, typography } from "@/design/tokens";
@@ -30,6 +33,38 @@ function Signal({ title, body }: { title: string; body: string }) {
       <h3 className={typography.sectionTitle}>{title}</h3>
       <p className={`${typography.body} ${surface.muted} mt-2`}>{body}</p>
     </li>
+  );
+}
+
+/** One row of figures per region the service has backtested, labelled by the API's name. */
+function RegionAccuracy() {
+  const { data } = useQuery(regionsQuery());
+  const rows = (data ?? []).flatMap((region) => {
+    const accuracy = regionAccuracy(region.backtest);
+    return accuracy ? [{ region, accuracy }] : [];
+  });
+  if (data && rows.length === 0) {
+    return <p className={`${typography.body} ${surface.muted} mt-5`}>{t.accuracyNone}</p>;
+  }
+  return (
+    <div className="mt-5 space-y-6">
+      {rows.map(({ region, accuracy }) => (
+        <div key={region.id}>
+          <div className={dashboard.tileHeader}>
+            <h3 className={dashboard.tileTitle}>{region.name}</h3>
+            <p className={typography.eyebrow}>{t.accuracyPeriod(accuracy.period)}</p>
+          </div>
+          <dl className={cells}>
+            {accuracy.figures.map((figure) => (
+              <div key={figure.key} className={cell}>
+                <dd className={dashboard.statValue}>{figure.value}</dd>
+                <dt className={typography.eyebrow}>{t.accuracyLabels[figure.key]}</dt>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -84,15 +119,8 @@ function AboutPage() {
           <h2 id="accuracy-heading" className={typography.sectionTitle}>
             {t.accuracyTitle}
           </h2>
-          <dl className={`mt-5 ${cells}`}>
-            {t.accuracyStats.map((stat) => (
-              <div key={stat.label} className={cell}>
-                <dd className={dashboard.statValue}>{stat.value}</dd>
-                <dt className={typography.eyebrow}>{stat.label}</dt>
-              </div>
-            ))}
-          </dl>
           <p className={`${typography.body} mt-4`}>{t.accuracyBody}</p>
+          <RegionAccuracy />
           <p className={`${typography.body} ${surface.muted} mt-2`}>{t.accuracyLimits}</p>
           <Link to="/operator/model-health" className={`${dashboard.link} mt-3 inline-block`}>
             {t.operatorLink}

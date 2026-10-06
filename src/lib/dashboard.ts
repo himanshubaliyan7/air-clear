@@ -109,38 +109,71 @@ export function regionBounds(
   return [west, south, east, north];
 }
 
-/* ---- the station the visitor looked at last ---- */
+/* ---- the station the visitor looked at last, per region ---- */
 
 export interface RememberedStation {
   regionId: string;
   stationId: string;
 }
 
-const STORAGE_KEY = "air-clear:last-station";
+/** The first version kept one slot for the whole site; it is still read. */
+const LEGACY_KEY = "air-clear:last-station";
+const STORAGE_KEY = "air-clear:last-stations";
 
 type StorageLike = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
-/** Storage can be missing or blocked (private mode); then nothing is remembered. */
-export function readRememberedStation(
-  storage: StorageLike | null | undefined,
-): RememberedStation | null {
+interface Remembered {
+  /** The region of the most recent visit. */
+  latest: string;
+  stations: Record<string, string>;
+}
+
+const isId = (value: unknown): value is string => typeof value === "string" && value !== "";
+
+function readJson(storage: StorageLike | null | undefined, key: string): unknown {
   try {
-    const raw = storage?.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const value = JSON.parse(raw) as Partial<RememberedStation> | null;
-    if (
-      value &&
-      typeof value.regionId === "string" &&
-      value.regionId !== "" &&
-      typeof value.stationId === "string" &&
-      value.stationId !== ""
-    ) {
-      return { regionId: value.regionId, stationId: value.stationId };
-    }
-    return null;
+    const raw = storage?.getItem(key);
+    return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
+}
+
+function readLegacy(storage: StorageLike | null | undefined): RememberedStation | null {
+  const value = readJson(storage, LEGACY_KEY) as Partial<RememberedStation> | null;
+  return value && isId(value.regionId) && isId(value.stationId)
+    ? { regionId: value.regionId, stationId: value.stationId }
+    : null;
+}
+
+function readAll(storage: StorageLike | null | undefined): Remembered | null {
+  const value = readJson(storage, STORAGE_KEY) as Partial<Remembered> | null;
+  if (!value || !isId(value.latest) || !value.stations || typeof value.stations !== "object") {
+    return null;
+  }
+  const stations: Record<string, string> = {};
+  for (const [regionId, stationId] of Object.entries(value.stations)) {
+    if (isId(stationId)) stations[regionId] = stationId;
+  }
+  return { latest: value.latest, stations };
+}
+
+/**
+ * The station last opened in a region, or, without a region, the one opened most
+ * recently anywhere. Storage can be missing or blocked (private mode); then nothing
+ * is remembered.
+ */
+export function readRememberedStation(
+  storage: StorageLike | null | undefined,
+  regionId?: string,
+): RememberedStation | null {
+  const all = readAll(storage);
+  const legacy = readLegacy(storage);
+  const wanted = regionId ?? all?.latest ?? legacy?.regionId;
+  if (!wanted) return null;
+  const stationId = all?.stations[wanted];
+  if (stationId) return { regionId: wanted, stationId };
+  return legacy?.regionId === wanted ? legacy : null;
 }
 
 export function rememberStation(
@@ -148,15 +181,30 @@ export function rememberStation(
   station: RememberedStation,
 ): void {
   try {
-    storage?.setItem(STORAGE_KEY, JSON.stringify(station));
+    const legacy = readLegacy(storage);
+    const stations = readAll(storage)?.stations ?? {};
+    // A station kept only in the old single slot moves across with the first write.
+    if (legacy && !stations[legacy.regionId]) stations[legacy.regionId] = legacy.stationId;
+    stations[station.regionId] = station.stationId;
+    const next: Remembered = { latest: station.regionId, stations };
+    storage?.setItem(STORAGE_KEY, JSON.stringify(next));
+    storage?.removeItem(LEGACY_KEY);
   } catch {
     // Not being able to remember is harmless.
   }
 }
 
-export function forgetStation(storage: StorageLike | null | undefined): void {
+/** Drops one region's station, e.g. when it no longer exists; other regions stay. */
+export function forgetStation(storage: StorageLike | null | undefined, regionId: string): void {
   try {
-    storage?.removeItem(STORAGE_KEY);
+    const legacy = readLegacy(storage);
+    if (legacy?.regionId === regionId) storage?.removeItem(LEGACY_KEY);
+    const all = readAll(storage);
+    if (!all?.stations[regionId]) return;
+    const { [regionId]: _gone, ...stations } = all.stations;
+    const latest = all.latest === regionId ? (Object.keys(stations)[0] ?? "") : all.latest;
+    if (!latest) storage?.removeItem(STORAGE_KEY);
+    else storage?.setItem(STORAGE_KEY, JSON.stringify({ latest, stations }));
   } catch {
     // As above.
   }

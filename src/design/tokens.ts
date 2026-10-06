@@ -47,6 +47,8 @@ export const control = {
   buttonPrimary: `${buttonBase} border-foreground bg-foreground text-background hover:bg-transparent hover:text-foreground`,
   iconButton: `inline-flex h-9 w-9 items-center justify-center border border-border text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background ${focusRing}`,
   input: `w-full rounded-none border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground ${focusRing}`,
+  /** A native select drawn as a mono label; the chevron is laid over it by its wrapper. */
+  select: `w-full min-w-0 appearance-none truncate rounded-none border border-border bg-background py-2 pl-3 pr-8 text-foreground transition-colors hover:border-foreground ${micro} ${focusRing}`,
   chip: `inline-flex items-center gap-2 border border-border px-3 py-1.5 ${micro} transition-colors hover:border-foreground ${focusRing}`,
   chipActive: `inline-flex items-center gap-2 border border-foreground bg-foreground px-3 py-1.5 text-background ${micro} ${focusRing}`,
 } as const;
@@ -177,6 +179,10 @@ export const dashboard = {
   row: "flex items-center gap-3 border-t border-hair px-1.5 py-2.5 text-sm",
   rowLink: `flex items-center gap-3 border-t border-hair px-1.5 py-2.5 text-sm transition-[background-color,padding] duration-200 hover:bg-muted hover:pl-4 ${focusRing}`,
   link: `border-b border-foreground/40 pb-0.5 transition-colors hover:border-foreground ${micro} ${focusRing}`,
+  /* Home page: one ruled row per region. */
+  regionList: "border-b border-hair",
+  regionRow: `group grid items-center gap-x-10 gap-y-5 border-t border-hair px-1.5 py-7 transition-[background-color,padding] duration-200 hover:bg-muted hover:pl-4 sm:py-9 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_auto] ${focusRing}`,
+  regionName: "font-display text-[clamp(2.4rem,6vw,5.5rem)] font-semibold uppercase leading-[0.88] tracking-[-0.02em] [overflow-wrap:anywhere]",
   mapFrame: "relative isolate overflow-hidden border border-border",
   mapCanvas: "h-80 w-full sm:h-[28rem]",
   mapNotice: "p-4 text-sm",

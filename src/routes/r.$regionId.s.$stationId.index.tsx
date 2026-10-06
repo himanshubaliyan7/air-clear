@@ -17,6 +17,7 @@ import { StationIndex } from "@/components/instrument/StationIndex";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { strings } from "@/i18n/strings";
 import { control, dashboard, surface, typography } from "@/design/tokens";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useRegion } from "@/region/region-context";
 import {
   browserStorage,
@@ -28,6 +29,7 @@ import {
 } from "@/lib/dashboard";
 import { pollutantDetail, responseZone } from "@/lib/forecast-detail";
 import { formatNumber } from "@/lib/format-time";
+import { regionAccuracy } from "@/lib/regions";
 import { formatPollutantId, withUnit } from "@/lib/pollutants";
 import { resolvePollutant } from "@/lib/stations";
 import { headlineLines, hourSlots, latestValue } from "@/lib/timeline";
@@ -85,6 +87,7 @@ function StationDashboard() {
   const stations = useQuery(stationsQuery(regionId));
   const station = stations.data?.find((item) => item.station_id === stationId) ?? null;
   const stationMissing = stations.data !== undefined && station === null;
+  useDocumentTitle(station?.name, region.name);
   const pollutant = resolvePollutant(requestedPollutant, pollutants) ?? pollutants[0];
 
   const current = useQuery({ ...currentAqiQuery(stationId), enabled: station !== null });
@@ -104,7 +107,7 @@ function StationDashboard() {
   // The overview offers a returning visitor this station as a shortcut.
   useEffect(() => {
     if (station) rememberStation(browserStorage(), { regionId, stationId });
-    else if (stationMissing) forgetStation(browserStorage());
+    else if (stationMissing) forgetStation(browserStorage(), regionId);
   }, [station, stationMissing, regionId, stationId]);
 
   const others = useMemo(
@@ -146,7 +149,7 @@ function StationDashboard() {
   const aboveThreshold = current.data?.is_current
     ? (current.data.at_or_above_health_threshold ?? null)
     : null;
-  const accuracy = strings.about.accuracyStats[0];
+  const accuracy = regionAccuracy(region.backtest);
 
   return (
     <section>
@@ -287,9 +290,13 @@ function StationDashboard() {
                 <li className="p-5">
                   <p className={typography.eyebrow}>{strings.instrument.factAccuracy}</p>
                   <p className="my-1 font-display text-[clamp(1.8rem,3vw,2.8rem)] font-semibold uppercase leading-none">
-                    {accuracy.value}
+                    {accuracy ? accuracy.figures[0]?.value : strings.instrument.factAccuracyNone}
                   </p>
-                  <p className={typography.eyebrow}>{accuracy.label}</p>
+                  <p className={typography.eyebrow}>
+                    {accuracy
+                      ? `${strings.about.accuracyLabels.tomorrow} · ${accuracy.period}`
+                      : strings.instrument.factAccuracyNoneNote}
+                  </p>
                   <Link to="/about" className={`${dashboard.link} mt-3 inline-block`}>
                     {strings.app.navAbout}
                   </Link>
