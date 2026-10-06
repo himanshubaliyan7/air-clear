@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, MapPin } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import {
   currentAqiQuery,
   exceedanceQuery,
@@ -9,14 +9,11 @@ import {
   overviewQuery,
   stationsQuery,
 } from "@/api/queries";
-import {
-  CategoryLegend,
-  HistoryTile,
-  NearbyTile,
-  NowTile,
-  OutlookTile,
-  PollutantTiles,
-} from "@/components/dashboard/tiles";
+import { CategoryLegend, NowPlot, PollutantLanes } from "@/components/dashboard/tiles";
+import { ForecastPlot } from "@/components/instrument/ForecastPlot";
+import { HourBars } from "@/components/instrument/HourBars";
+import { Lines, Section } from "@/components/instrument/primitives";
+import { StationIndex } from "@/components/instrument/StationIndex";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { strings } from "@/i18n/strings";
 import { control, dashboard, surface, typography } from "@/design/tokens";
@@ -29,16 +26,20 @@ import {
   rememberStation,
   stationGlance,
 } from "@/lib/dashboard";
-import { formatPollutantId } from "@/lib/pollutants";
+import { pollutantDetail, responseZone } from "@/lib/forecast-detail";
+import { formatNumber } from "@/lib/format-time";
+import { formatPollutantId, withUnit } from "@/lib/pollutants";
 import { resolvePollutant } from "@/lib/stations";
+import { headlineLines, hourSlots, latestValue } from "@/lib/timeline";
 
 /** The map and its library are fetched only when the visitor opens the map. */
 const StationMap = lazy(() =>
   import("@/components/dashboard/StationMap").then((module) => ({ default: module.StationMap })),
 );
 
-/** How much history the chart tile shows. */
+/** How much history the hour bars show. */
 const HISTORY_DAYS = 2;
+const HISTORY_HOURS = HISTORY_DAYS * 24;
 
 interface StationOverviewSearch {
   pollutant?: string | undefined;
@@ -73,28 +74,6 @@ export const Route = createFileRoute("/r/$regionId/s/$stationId/")({
   component: StationDashboard,
 });
 
-function Tile({
-  title,
-  className,
-  action,
-  children,
-}: {
-  title: string;
-  className: string;
-  action?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className={`${dashboard.tile} ${className}`} aria-label={title}>
-      <div className={dashboard.tileHeader}>
-        <h2 className={dashboard.tileTitle}>{title}</h2>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 function StationDashboard() {
   const { regionId, stationId } = Route.useParams();
   const { pollutant: requestedPollutant } = Route.useSearch();
@@ -122,14 +101,14 @@ function StationDashboard() {
   });
   const overview = useQuery({ ...overviewQuery(regionId), enabled: station !== null });
 
-  // The home page brings a returning visitor back to this station.
+  // The overview offers a returning visitor this station as a shortcut.
   useEffect(() => {
     if (station) rememberStation(browserStorage(), { regionId, stationId });
     else if (stationMissing) forgetStation(browserStorage());
   }, [station, stationMissing, regionId, stationId]);
 
-  const nearby = useMemo(
-    () => nearbyStations(overview.data?.stations ?? [], stationId, categories),
+  const others = useMemo(
+    () => nearbyStations(overview.data?.stations ?? [], stationId, categories, Infinity),
     [overview.data, stationId, categories],
   );
   const mapStations = useMemo(
@@ -137,6 +116,10 @@ function StationDashboard() {
     [overview.data, categories],
   );
   const bounds = useMemo(() => regionBounds(region.bbox), [region]);
+  const slots = useMemo(
+    () => hourSlots(history.data?.points ?? [], HISTORY_HOURS),
+    [history.data],
+  );
 
   const setPollutant = (value: string) =>
     void navigate({ search: { pollutant: value }, replace: true });
@@ -147,128 +130,175 @@ function StationDashboard() {
       search: (prev) => prev,
     });
 
+  const detail = pollutantDetail(region, pollutant);
+  const pollutantLabel = pollutant ? formatPollutantId(pollutant) : "";
+  const newest = latestValue(slots);
+  const particles =
+    newest === null
+      ? null
+      : {
+          concentration: newest,
+          note: strings.instrument.dotsNote(
+            pollutantLabel,
+            withUnit(formatNumber(newest, { maximumFractionDigits: 0 }), detail.unit),
+          ),
+        };
+  const aboveThreshold = current.data?.is_current
+    ? (current.data.at_or_above_health_threshold ?? null)
+    : null;
+  const accuracy = strings.about.accuracyStats[0];
+
   return (
-    <section className={surface.section}>
+    <section>
       {stations.isPending && <LoadingState />}
       {stations.error && (
         <ErrorState error={stations.error} onRetry={() => void stations.refetch()} />
       )}
 
       {stationMissing && (
-        <>
+        <div className="space-y-4">
           <EmptyState title={strings.stations.unknownTitle} body={strings.stations.unknownBody} />
           <Link to="/r/$regionId" params={{ regionId }} search={{}} className={control.button}>
             {strings.stations.backToList}
           </Link>
-        </>
+        </div>
       )}
 
       {station && (
-        <>
-          <header className="flex flex-wrap items-end justify-between gap-3">
-            <div className="min-w-0 space-y-1">
-              <Link
-                to="/r/$regionId"
-                params={{ regionId }}
-                search={{}}
-                className={`${dashboard.link} inline-flex items-center gap-1`}
-              >
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                {strings.dashboard.allStations}
-              </Link>
-              <h1 className={typography.pageTitle}>{station.name}</h1>
-              <p className={`flex items-center gap-1 ${typography.body} ${surface.muted}`}>
-                <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
+        <div className="grid gap-x-12 gap-y-8 xl:grid-cols-[clamp(13rem,15vw,17rem)_minmax(0,1fr)]">
+          <StationIndex stations={others} regionId={regionId} />
+
+          {/* Keyed by station, so every drawing animates in again for a new station. */}
+          <div key={stationId} className={`min-w-0 ${surface.section}`}>
+            <header className="space-y-3">
+              <p className={`rise-in flex flex-wrap items-center gap-x-4 ${typography.eyebrow}`}>
+                <Link
+                  to="/r/$regionId"
+                  params={{ regionId }}
+                  search={{}}
+                  className="inline-flex items-center gap-1.5 transition-colors hover:text-foreground"
+                >
+                  <ArrowLeft className="h-3 w-3" aria-hidden="true" />
+                  {strings.dashboard.allStations}
+                </Link>
+                <span aria-hidden="true">/</span>
                 {station.city}
               </p>
+              <h1 className={typography.mega}>
+                <Lines lines={headlineLines(station.name)} />
+              </h1>
+            </header>
+
+            <div className="grid gap-x-12 gap-y-10 2xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
+              <section aria-label={strings.dashboard.nowTitle} className="min-w-0">
+                {current.isPending && <LoadingState />}
+                {current.error && (
+                  <ErrorState error={current.error} onRetry={() => void current.refetch()} />
+                )}
+                {current.data && (
+                  <NowPlot reading={current.data} regionContext={regionContext} particles={particles} />
+                )}
+              </section>
+
+              <Section
+                title={strings.instrument.forecastTitle(pollutantLabel)}
+                note={detail.unit ? strings.instrument.forecastUnit(detail.unit) : undefined}
+                action={
+                  pollutants.length > 1 && (
+                    <label className="flex items-center gap-2">
+                      <span className="sr-only">{strings.outlook.pollutantLabel}</span>
+                      <select
+                        className={`${control.input} w-auto py-1 ${typography.micro}`}
+                        value={pollutant}
+                        onChange={(event) => setPollutant(event.target.value)}
+                      >
+                        {pollutants.map((item) => (
+                          <option key={item} value={item}>
+                            {formatPollutantId(item)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )
+                }
+              >
+                {pollutants.length === 0 && <EmptyState body={strings.outlook.noPollutants} />}
+                {pollutant && outlook.isPending && <LoadingState />}
+                {pollutant && outlook.error && (
+                  <ErrorState error={outlook.error} onRetry={() => void outlook.refetch()} />
+                )}
+                {outlook.data && <ForecastPlot data={outlook.data} regionContext={regionContext} />}
+                {station.has_current_forecast === true && (
+                  <Link
+                    to="/r/$regionId/s/$stationId/forecast"
+                    params={{ regionId, stationId }}
+                    search={pollutant ? { pollutant } : {}}
+                    className={`${dashboard.link} mt-5 inline-block`}
+                  >
+                    {strings.forecastDetail.linkLabel}
+                  </Link>
+                )}
+              </Section>
             </div>
-            <Link to="/r/$regionId" params={{ regionId }} search={{}} className={control.button}>
-              {strings.dashboard.changeStation}
-            </Link>
-          </header>
-
-          <div className={dashboard.grid}>
-            <Tile title={strings.dashboard.nowTitle} className={dashboard.hero}>
-              {current.isPending && <LoadingState />}
-              {current.error && (
-                <ErrorState error={current.error} onRetry={() => void current.refetch()} />
-              )}
-              {current.data && <NowTile reading={current.data} regionContext={regionContext} />}
-            </Tile>
-
-            <Tile
-              title={strings.dashboard.outlookTitle}
-              className={dashboard.outlook}
-              action={
-                pollutants.length > 1 && (
-                  <label className="flex items-center gap-2">
-                    <span className="sr-only">{strings.outlook.pollutantLabel}</span>
-                    <select
-                      className={`${control.input} w-auto py-1`}
-                      value={pollutant}
-                      onChange={(event) => setPollutant(event.target.value)}
-                    >
-                      {pollutants.map((item) => (
-                        <option key={item} value={item}>
-                          {formatPollutantId(item)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )
-              }
-            >
-              {pollutants.length === 0 && <EmptyState body={strings.outlook.noPollutants} />}
-              {pollutant && outlook.isPending && <LoadingState />}
-              {pollutant && outlook.error && (
-                <ErrorState error={outlook.error} onRetry={() => void outlook.refetch()} />
-              )}
-              {outlook.data && <OutlookTile data={outlook.data} regionContext={regionContext} />}
-              {station.has_current_forecast === true && (
-                <Link
-                  to="/r/$regionId/s/$stationId/forecast"
-                  params={{ regionId, stationId }}
-                  search={pollutant ? { pollutant } : {}}
-                  className={`${dashboard.link} mt-3 inline-block`}
-                >
-                  {strings.forecastDetail.linkLabel}
-                </Link>
-              )}
-            </Tile>
-
-            <Tile title={strings.dashboard.pollutantsTitle} className={dashboard.pollutants}>
-              {current.isPending && <LoadingState />}
-              {current.data && (
-                <PollutantTiles reading={current.data} regionContext={regionContext} />
-              )}
-            </Tile>
 
             {pollutant && (
-              <Tile
-                title={strings.dashboard.historyTitle(formatPollutantId(pollutant))}
-                className={dashboard.history}
-              >
+              <Section title={strings.instrument.barsTitle(pollutantLabel)}>
                 {history.isPending && <LoadingState />}
                 {history.error && (
                   <ErrorState error={history.error} onRetry={() => void history.refetch()} />
                 )}
-                {history.data && (
-                  <HistoryTile data={history.data} region={region} pollutant={pollutant} />
-                )}
-              </Tile>
+                {history.data &&
+                  (slots.length === 0 ? (
+                    <EmptyState body={strings.dashboard.historyEmpty} />
+                  ) : (
+                    <HourBars
+                      slots={slots}
+                      outlook={outlook.data ?? null}
+                      categories={categories}
+                      timeZone={responseZone(history.data.timezone, region.timezone)}
+                      unit={detail.unit}
+                      threshold={detail.thresholdConcentration}
+                      describeCategory={regionContext.describeCategory}
+                    />
+                  ))}
+              </Section>
             )}
 
-            <Tile title={strings.dashboard.nearbyTitle} className={dashboard.nearby}>
-              {overview.isPending && <LoadingState />}
-              {overview.error && (
-                <ErrorState error={overview.error} onRetry={() => void overview.refetch()} />
-              )}
-              {overview.data && <NearbyTile stations={nearby} regionId={regionId} />}
-            </Tile>
+            <div className="grid gap-x-12 gap-y-10 2xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+              <Section title={strings.dashboard.pollutantsTitle} note={strings.instrument.lanesNote}>
+                {current.isPending && <LoadingState />}
+                {current.data && (
+                  <PollutantLanes reading={current.data} regionContext={regionContext} />
+                )}
+              </Section>
 
-            <Tile
+              <ul className="rise-in grid content-start self-start border border-border">
+                <li className="border-b border-border p-5">
+                  <p className={typography.eyebrow}>{strings.instrument.factThreshold}</p>
+                  <p className="my-1 font-display text-[clamp(1.8rem,3vw,2.8rem)] font-semibold uppercase leading-none">
+                    {aboveThreshold === true
+                      ? strings.instrument.thresholdAbove
+                      : aboveThreshold === false
+                        ? strings.instrument.thresholdBelow
+                        : strings.instrument.thresholdUnknown}
+                  </p>
+                  <p className={typography.eyebrow}>{regionContext.aqiStandard}</p>
+                </li>
+                <li className="p-5">
+                  <p className={typography.eyebrow}>{strings.instrument.factAccuracy}</p>
+                  <p className="my-1 font-display text-[clamp(1.8rem,3vw,2.8rem)] font-semibold uppercase leading-none">
+                    {accuracy.value}
+                  </p>
+                  <p className={typography.eyebrow}>{accuracy.label}</p>
+                  <Link to="/about" className={`${dashboard.link} mt-3 inline-block`}>
+                    {strings.app.navAbout}
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            <Section
               title={strings.dashboard.mapTitle}
-              className={dashboard.map}
               action={
                 <button
                   type="button"
@@ -280,12 +310,12 @@ function StationDashboard() {
                 </button>
               }
             >
-              <p className={`${typography.small} ${surface.muted} mb-2`}>
+              <p className={`mb-3 ${typography.small} ${surface.muted}`}>
                 {strings.dashboard.mapHint}
               </p>
               <CategoryLegend categories={categories} />
               {mapOpen && (
-                <div className="mt-3">
+                <div className="mt-4">
                   <Suspense fallback={<LoadingState />}>
                     <StationMap
                       stations={mapStations}
@@ -296,9 +326,9 @@ function StationDashboard() {
                   </Suspense>
                 </div>
               )}
-            </Tile>
+            </Section>
           </div>
-        </>
+        </div>
       )}
     </section>
   );

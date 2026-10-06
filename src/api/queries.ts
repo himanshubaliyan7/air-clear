@@ -60,6 +60,22 @@ export const overviewQuery = (regionId?: string) =>
     ...shared,
   });
 
+/**
+ * Decoration for the overview (the hour stripes), so it is not retried: without
+ * it the stations still show their reading and verdict.
+ */
+export const overviewHistoryQuery = (regionId: string | undefined, pollutant: string | undefined) =>
+  queryOptions({
+    queryKey: ["overview-history", regionId ?? null, pollutant ?? null] as const,
+    queryFn: ({ signal }) =>
+      api.getOverviewHistory(
+        { ...(regionId ? { region_id: regionId } : {}), ...(pollutant ? { pollutant } : {}) },
+        signal,
+      ),
+    ...shared,
+    retry: false as const,
+  });
+
 export const stationQuery = (stationId: string) =>
   queryOptions({
     queryKey: ["station", stationId] as const,
