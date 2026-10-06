@@ -17,10 +17,10 @@ import { strings } from "@/i18n/strings";
 import { surface, typography } from "@/design/tokens";
 
 const columns =
-  "grid items-center gap-x-5 gap-y-2 md:grid-cols-[2rem_minmax(8rem,15rem)_3.6rem_minmax(0,1fr)_11.5rem]";
+  "grid items-center gap-x-5 gap-y-2 md:grid-cols-[2rem_minmax(8rem,17rem)_3.6rem_minmax(0,1fr)_11.5rem]";
 const rowBase = `${columns} w-full grid-cols-[1.6rem_minmax(0,1fr)_auto] border-t border-hair px-2 py-3 transition-[background-color,opacity,padding] duration-200 [grid-template-areas:'rank_name_index''stripes_stripes_stripes''verdict_verdict_verdict'] hover:bg-muted hover:pl-5 focus-visible:bg-muted md:py-2 md:[grid-template-areas:'rank_name_index_stripes_verdict']`;
-/** Measured hours, a break, then the forecast days, in proportion to the time they cover. */
-const stripeTrack = "grid h-8 min-w-0 grid-cols-[48fr_6fr_120fr] items-stretch [grid-area:stripes]";
+/** Measured hours, a break, then the forecast days. */
+const stripeTrack = "grid h-8 min-w-0 grid-cols-[1fr_1.25rem_1.3fr] items-stretch [grid-area:stripes]";
 
 export interface StationMatrixProps {
   stations: readonly StationSummary[];
@@ -85,7 +85,7 @@ export function StationMatrix({
         <span />
         <span>{strings.instrument.colStation}</span>
         <span className="text-right">{strings.instrument.colIndex}</span>
-        <span className="grid grid-cols-[48fr_6fr_120fr]">
+        <span className="grid grid-cols-[1fr_1.25rem_1.3fr]">
           <span>{strings.instrument.matrixHours}</span>
           <span />
           <span

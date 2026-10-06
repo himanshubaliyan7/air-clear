@@ -59,6 +59,9 @@ export function StationIndex({
                 params={{ regionId, stationId: station.stationId }}
                 search={(prev) => prev}
                 className={row}
+                title={strings.dashboard.distance(
+                  formatNumber(station.distanceKm, { maximumFractionDigits: 1 }),
+                )}
               >
                 {station.hasValue ? (
                   <Square color={station.color} />
@@ -71,12 +74,6 @@ export function StationIndex({
                     {station.categoryLabel ?? strings.dashboard.noData}{" "}
                   </span>
                   {station.indexValue !== null ? formatNumber(station.indexValue) : "–"}
-                  <span className="max-xl:hidden">
-                    {" · "}
-                    {strings.dashboard.distance(
-                      formatNumber(station.distanceKm, { maximumFractionDigits: 1 }),
-                    )}
-                  </span>
                 </span>
               </Link>
             </li>

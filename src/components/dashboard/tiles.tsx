@@ -257,7 +257,7 @@ export function PollutantLanes({
           );
         })}
       </ul>
-      <p className={`mt-3 ${typography.eyebrow}`}>
+      <p className={`mt-3 ${typography.small} ${surface.muted}`}>
         {strings.current.subIndexLabel}. {strings.current.subIndexNote}
       </p>
     </>

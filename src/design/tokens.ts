@@ -18,7 +18,7 @@ const micro = "font-mono text-[0.66rem] font-medium uppercase leading-normal tra
 export const surface = {
   page: "bg-background text-foreground",
   card: "border border-border bg-card text-card-foreground p-4",
-  section: "space-y-8 sm:space-y-12",
+  section: "space-y-4",
   muted: "text-muted-foreground",
   /** A dashed box for "nothing to show here". */
   empty: "border border-dashed border-border p-5",
@@ -29,6 +29,8 @@ export const typography = {
     "font-display text-4xl font-semibold uppercase leading-[0.9] tracking-tight [overflow-wrap:anywhere] sm:text-6xl",
   /** The headline of the two dashboards. */
   mega: "font-display text-[clamp(2.75rem,9.5vw,9rem)] font-semibold uppercase leading-[0.84] tracking-[-0.02em] [overflow-wrap:anywhere]",
+  /** A station's name: the same headline, sized for longer text. */
+  megaName: "font-display text-[clamp(2.25rem,6vw,6rem)] font-semibold uppercase leading-[0.86] tracking-[-0.02em] [overflow-wrap:anywhere]",
   sectionTitle: "font-display text-xl font-semibold uppercase leading-tight tracking-tight",
   lead: "max-w-[54ch] text-[clamp(1rem,1.35vw,1.3rem)] leading-snug",
   body: "text-[0.95rem] leading-relaxed",
@@ -149,6 +151,8 @@ export const skeleton = "animate-pulse bg-muted";
  * drawn only around a plot or a group of cells.
  */
 export const dashboard = {
+  /** The vertical rhythm between the sections of a dashboard. */
+  stack: "space-y-10 sm:space-y-14",
   grid: "grid grid-cols-1 gap-x-10 gap-y-10 lg:grid-cols-12",
   tile: "rise-in min-w-0",
   half: "lg:col-span-6",

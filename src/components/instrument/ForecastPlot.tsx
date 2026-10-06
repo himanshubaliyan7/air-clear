@@ -20,7 +20,7 @@ import { surface, typography, verdictFill } from "@/design/tokens";
 const word =
   "font-display text-[clamp(1.9rem,12.2cqi,5.6rem)] font-semibold uppercase leading-[0.86] tracking-[-0.02em]";
 const dayRow =
-  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-t border-hair py-3 transition-colors hover:bg-muted [grid-template-areas:'day_verdict''lane_lane''values_values'] sm:grid-cols-[5.5rem_minmax(0,1fr)_7.5rem_10rem] sm:[grid-template-areas:'day_lane_values_verdict']";
+  "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-t border-hair py-3 transition-colors hover:bg-muted [grid-template-areas:'day_verdict''lane_lane''values_values'] @md:grid-cols-[6rem_minmax(0,1fr)_6.5rem_max-content] @md:[grid-template-areas:'day_lane_values_verdict']";
 
 function hasValue(value: number | null | undefined): value is number {
   return value !== null && value !== undefined && Number.isFinite(value);
@@ -94,7 +94,7 @@ export function ForecastPlot({
             className={`${dayRow} border-t-0 !py-0 pb-1 hover:!bg-transparent ${typography.eyebrow}`}
             aria-hidden="true"
           >
-            <span className="[grid-area:day] max-sm:hidden">{strings.instrument.colDay}</span>
+            <span className="[grid-area:day] @max-md:hidden">{strings.instrument.colDay}</span>
             <span className="relative h-10 [grid-area:lane]">
               {daily &&
                 ticks.map((tick) => (
@@ -115,10 +115,10 @@ export function ForecastPlot({
                 </span>
               )}
             </span>
-            <span className="[grid-area:values] max-sm:hidden">
+            <span className="[grid-area:values] @max-md:hidden">
               {daily ? strings.instrument.colMean : strings.outlook.dayProbability}
             </span>
-            <span className="[grid-area:verdict] max-sm:hidden">{strings.instrument.colVerdict}</span>
+            <span className="[grid-area:verdict] @max-md:hidden">{strings.instrument.colVerdict}</span>
           </div>
           <ul>
             {data.days.map((day, index) => {
@@ -194,7 +194,7 @@ export function ForecastPlot({
                       </>
                     )}
                   </span>
-                  <span className="justify-self-end [grid-area:verdict] sm:justify-self-start">
+                  <span className="justify-self-end [grid-area:verdict] @md:justify-self-start">
                     {verdict && <VerdictMark view={verdict} />}
                   </span>
                 </li>
@@ -202,7 +202,7 @@ export function ForecastPlot({
             })}
           </ul>
           {daily && (
-            <p className={`mt-4 max-w-[70ch] ${typography.eyebrow}`}>
+            <p className={`mt-4 max-w-[70ch] ${typography.small} ${surface.muted}`}>
               {strings.outlook.estimateNote} {strings.instrument.plotNote}
               {data.days.some((day) => hasValue(day.expected_sub_index)) && (
                 <> {strings.outlook.indexNote(formatPollutantId(data.pollutant))}</>

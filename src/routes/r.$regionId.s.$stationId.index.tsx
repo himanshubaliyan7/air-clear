@@ -165,11 +165,11 @@ function StationDashboard() {
       )}
 
       {station && (
-        <div className="grid gap-x-12 gap-y-8 xl:grid-cols-[clamp(13rem,15vw,17rem)_minmax(0,1fr)]">
+        <div className="grid gap-x-12 gap-y-8 xl:grid-cols-[clamp(15rem,17vw,19rem)_minmax(0,1fr)]">
           <StationIndex stations={others} regionId={regionId} />
 
           {/* Keyed by station, so every drawing animates in again for a new station. */}
-          <div key={stationId} className={`min-w-0 ${surface.section}`}>
+          <div key={stationId} className={`min-w-0 ${dashboard.stack}`}>
             <header className="space-y-3">
               <p className={`rise-in flex flex-wrap items-center gap-x-4 ${typography.eyebrow}`}>
                 <Link
@@ -184,7 +184,7 @@ function StationDashboard() {
                 <span aria-hidden="true">/</span>
                 {station.city}
               </p>
-              <h1 className={typography.mega}>
+              <h1 className={typography.megaName}>
                 <Lines lines={headlineLines(station.name)} />
               </h1>
             </header>

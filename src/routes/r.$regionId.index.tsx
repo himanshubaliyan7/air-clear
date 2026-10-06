@@ -140,7 +140,7 @@ function RegionOverview() {
   const filtered = q !== "" || category !== undefined;
 
   return (
-    <section className={surface.section}>
+    <section className={dashboard.stack}>
       <header className="grid items-end gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <div>
           <p className={`rise-in ${typography.eyebrow}`}>
