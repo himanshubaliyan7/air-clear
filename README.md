@@ -20,11 +20,13 @@ The data pipeline, forecasting rule and API live in a separate repository:
 ## What it shows
 
 - **Region overview** (`/r/$regionId`): how many stations report, how many are at or above
-  the health threshold, stations by category right now, stations by outlook verdict, the
-  highest and lowest readings, and a searchable, filterable grid of every station.
-- **Station dashboard** (`/r/$regionId/s/$stationId`): the current index on the category
-  scale, the five-day outlook as a forecast strip, each pollutant with its range, the last
-  48 hours as a chart, and the nearest stations.
+  the health threshold, stations by category right now and by outlook verdict, and every
+  station as one row: its last 48 measured hours as colour stripes, a cell for each
+  forecast day, and the verdict. The rows can be searched, filtered and sorted.
+- **Station dashboard** (`/r/$regionId/s/$stationId`): the current index in a plot whose
+  drifting dots are drawn to the newest measured concentration, the outlook verdict with
+  one lane per forecast day on a shared axis, a bar for every measured hour next to the
+  forecast days, each pollutant with its range, and the other stations, nearest first.
 - **Forecast detail**: the expected mean of each day with its likely range, and past
   forecasts against what was measured.
 - **An optional map** (Leaflet + OpenStreetMap), downloaded only when the visitor opens it.
@@ -40,6 +42,12 @@ The data pipeline, forecasting rule and API live in a separate repository:
   "no data" in neutral grey, and is covered by tests (`src/lib/recommendation.ts`,
   `src/lib/overview.ts`).
 - **Colour is never the only signal.** Every coloured mark sits next to its label.
+- **Colour always means data.** The interface has no accent colour: it is bone on black,
+  or ink on paper in the light theme. The only colour on a page is a category or a
+  verdict the API returned. A missing hour or outlook is hatched, never coloured.
+- **Motion is optional.** Headlines, frames, stripes and bars animate once on arrival
+  with CSS, and the particle window is one small canvas. All of it stops for visitors
+  who ask for reduced motion.
 - **Light by default.** No chart or map library in the main bundle: the charts are
   hand-written SVG, and the map code loads on demand.
 - **Accessible.** Keyboard-operable charts with a table alternative, visible focus, screen
@@ -81,7 +89,7 @@ Anything the API does not provide is recorded in `BACKEND_REQUESTS.md`, never fa
 ```
 src/api          generated types, client, query cache policy
 src/lib          pure functions (shaping, formatting, safety rules) and their tests
-src/components   tiles, charts, map, shared states
+src/components   plots, lanes, the station matrix, charts, map, shared states
 src/routes       file-based routes
 src/design       presentation tokens (the only place class names for colour live)
 src/i18n         every user-facing string

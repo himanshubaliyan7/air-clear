@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, CalendarDays, Gauge, ShieldQuestion } from "lucide-react";
-import type { ReactNode } from "react";
+import { ArrowRight } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
+import { Lines } from "@/components/instrument/primitives";
+import { headlineLines } from "@/lib/timeline";
 import { strings } from "@/i18n/strings";
 import { control, dashboard, shell, surface, typography } from "@/design/tokens";
 
@@ -20,14 +21,14 @@ export const Route = createFileRoute("/about")({
   component: AboutPage,
 });
 
-function Signal({ icon, title, body }: { icon: ReactNode; title: string; body: string }) {
+const cells = "rise-in grid border border-border sm:grid-cols-3";
+const cell = "border-b border-border p-5 last:border-b-0 sm:border-b-0 sm:border-r sm:last:border-r-0";
+
+function Signal({ title, body }: { title: string; body: string }) {
   return (
-    <li className={dashboard.stat}>
-      <span className={dashboard.statIcon} aria-hidden="true">
-        {icon}
-      </span>
-      <h3 className="mt-3 text-sm font-semibold">{title}</h3>
-      <p className={`${typography.body} ${surface.muted} mt-1`}>{body}</p>
+    <li className={cell}>
+      <h3 className={typography.sectionTitle}>{title}</h3>
+      <p className={`${typography.body} ${surface.muted} mt-2`}>{body}</p>
     </li>
   );
 }
@@ -36,33 +37,27 @@ function AboutPage() {
   return (
     <div className={shell.page}>
       <AppHeader />
-      <main className={`${shell.main} max-w-4xl`}>
-        <header className="space-y-3">
-          <p className={typography.eyebrow}>{strings.app.navAbout}</p>
-          <h1 className={typography.pageTitle}>{t.title}</h1>
-          <p className={`${typography.body} ${surface.muted} max-w-2xl text-base`}>{t.intro}</p>
+      <main className={`${shell.main} !max-w-5xl`}>
+        <header className="space-y-5">
+          <p className={`rise-in ${typography.eyebrow}`}>{strings.app.navAbout}</p>
+          <h1 className={typography.mega}>
+            <Lines lines={headlineLines(t.title)} />
+          </h1>
+          <p className={`rise-in ${typography.lead}`}>{t.intro}</p>
           <Link to="/" className={control.buttonPrimary}>
             {t.backHome}
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </header>
 
-        <section className="space-y-3" aria-labelledby="signals-heading">
+        <section className="space-y-4" aria-labelledby="signals-heading">
           <h2 id="signals-heading" className={typography.sectionTitle}>
             {t.signalsTitle}
           </h2>
-          <ul className="grid gap-3 sm:grid-cols-3">
-            <Signal icon={<Gauge className="h-4 w-4" />} title={t.nowTitle} body={t.nowBody} />
-            <Signal
-              icon={<CalendarDays className="h-4 w-4" />}
-              title={t.outlookTitle}
-              body={t.outlookBody}
-            />
-            <Signal
-              icon={<ShieldQuestion className="h-4 w-4" />}
-              title={t.noDataTitle}
-              body={t.noDataBody}
-            />
+          <ul className={cells}>
+            <Signal title={t.nowTitle} body={t.nowBody} />
+            <Signal title={t.outlookTitle} body={t.outlookBody} />
+            <Signal title={t.noDataTitle} body={t.noDataBody} />
           </ul>
         </section>
 
@@ -70,16 +65,13 @@ function AboutPage() {
           <h2 id="pipeline-heading" className={typography.sectionTitle}>
             {t.pipelineTitle}
           </h2>
-          <ol className="mt-4 grid gap-4 sm:grid-cols-5">
+          <ol className="mt-5 grid gap-x-6 gap-y-6 sm:grid-cols-5">
             {t.pipeline.map((step, index) => (
-              <li key={step.title} className="relative">
-                <span
-                  className={`flex h-7 w-7 items-center justify-center rounded-full bg-brand text-xs font-semibold text-brand-foreground ${typography.number}`}
-                  aria-hidden="true"
-                >
-                  {index + 1}
+              <li key={step.title} className="border-t border-foreground pt-3">
+                <span className={`${typography.eyebrow} ${typography.number}`} aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-2 text-sm font-semibold">{step.title}</h3>
+                <h3 className="mt-1 font-display text-lg font-semibold uppercase">{step.title}</h3>
                 <p className={`${typography.small} ${surface.muted} mt-1 leading-relaxed`}>
                   {step.body}
                 </p>
@@ -92,11 +84,11 @@ function AboutPage() {
           <h2 id="accuracy-heading" className={typography.sectionTitle}>
             {t.accuracyTitle}
           </h2>
-          <dl className="mt-4 grid gap-3 sm:grid-cols-3">
+          <dl className={`mt-5 ${cells}`}>
             {t.accuracyStats.map((stat) => (
-              <div key={stat.label} className={dashboard.pollutantTile}>
+              <div key={stat.label} className={cell}>
                 <dd className={dashboard.statValue}>{stat.value}</dd>
-                <dt className={`${typography.small} ${surface.muted}`}>{stat.label}</dt>
+                <dt className={typography.eyebrow}>{stat.label}</dt>
               </div>
             ))}
           </dl>
@@ -107,14 +99,14 @@ function AboutPage() {
           </Link>
         </section>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-10 sm:grid-cols-2">
           <section className={dashboard.tile} aria-labelledby="stack-heading">
             <h2 id="stack-heading" className={typography.sectionTitle}>
               {t.stackTitle}
             </h2>
             <ul className="mt-3 flex flex-wrap gap-1.5">
               {t.stack.map((item) => (
-                <li key={item} className={`${dashboard.pill} bg-surface`}>
+                <li key={item} className={`${dashboard.pill} border border-border px-2.5 py-1.5`}>
                   {item}
                 </li>
               ))}

@@ -32,3 +32,5 @@ export type SubscriptionAvailability = components["schemas"]["SubscriptionAvaila
 export type Overview = components["schemas"]["OverviewOut"];
 export type OverviewStation = components["schemas"]["OverviewStationOut"];
 export type OverviewCurrentAqi = components["schemas"]["OverviewCurrentAqiOut"];
+export type OverviewHistory = components["schemas"]["OverviewHistoryOut"];
+export type OverviewHistoryStation = components["schemas"]["OverviewHistoryStationOut"];

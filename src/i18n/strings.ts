@@ -196,6 +196,62 @@ export const strings = {
     legendTitle: "Category",
   },
 
+  instrument: {
+    kicker: (total: number, standard: string) => `Region overview / ${total} stations / ${standard}`,
+    headlineTail: "Air, today",
+    lead: (withReading: number, total: number, above: number) =>
+      `${withReading} of ${total} stations are reporting. ${above} ${above === 1 ? "is" : "are"} at or above the level where outdoor practice is not recommended.`,
+    matrixTitle: (pollutant: string) =>
+      `Every station · ${pollutant} · 48 hours measured, then the forecast days`,
+    matrixHours: "− 48 h",
+    colStation: "Station",
+    colIndex: "Index",
+    colNextDays: "Next days",
+    stripesLabel: (hours: number) => `Measured hours, oldest first: ${hours} with a value.`,
+    stripesEmpty: "No measured hours",
+    noOutlookCells: "No current outlook",
+    stationIndex: "Nearest stations",
+    stationSearch: "Search all stations",
+    dotsNote: (pollutant: string, value: string) => `Dots drawn to ${pollutant} · ≈ ${value}`,
+    notAForecast: "The official reading for the air right now, not a forecast.",
+    forecastTitle: (pollutant: string) => `Forecast · ${pollutant}`,
+    forecastUnit: (unit: string) => `Mean of the day, ${unit}`,
+    colDay: "Day",
+    colMean: "Mean → could reach",
+    colVerdict: "Verdict",
+    limit: (value: string) => `${value} limit`,
+    dayRange: (mean: string, upper: string) => `Expected ${mean}, could reach ${upper}`,
+    plotNote:
+      "The diamond is the expected mean of the day and the line reaches the upper bound.",
+    barsTitle: (pollutant: string) =>
+      `${pollutant} · every measured hour, then the mean of each forecast day`,
+    barsSummary: (hours: number, days: number, unit: string) =>
+      `${hours} measured hours and ${days} forecast day${days === 1 ? "" : "s"}, in ${unit}. Gaps mean no value.`,
+    barsHint: "Move over the bars, or focus them and use the arrow keys",
+    barsMeasured: "Measured, hourly",
+    barsForecast: "Forecast, mean of the day · hatched = could reach",
+    barsForecastShort: "Forecast",
+    barsMeasuredShort: "Measured",
+    now: "Now",
+    barsHour: (when: string, value: string, category: string | null) =>
+      category ? `${when} · ${value} · ${category}` : `${when} · ${value}`,
+    barsHourEmpty: (when: string) => `${when} · no value`,
+    barsDay: (day: string, mean: string, upper: string, verdict: string | null) =>
+      `${day} · mean ${mean}, could reach ${upper}${verdict ? ` · ${verdict}` : ""}`,
+    lanesNote: "Diamond = now · line = range over the last day",
+    laneLabel: (pollutant: string, value: string, low: string, high: string) =>
+      `${pollutant} ${value}, range ${low} to ${high}`,
+    factThreshold: "Health threshold",
+    thresholdAbove: "At or above",
+    thresholdBelow: "Below",
+    thresholdUnknown: "No verdict",
+    factAccuracy: "Forecast accuracy",
+    statusLive: "Live",
+    statusData: (when: string) => `Data ${when}`,
+    statusReporting: "Reporting",
+    statusOf: (a: number, b: number) => `${a} / ${b}`,
+  },
+
   regions: {
     switcherLabel: "Region",
     noneTitle: "No regions available",

@@ -1,38 +1,26 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import {
-  Activity,
-  ArrowRight,
-  CalendarCheck,
-  CalendarX,
-  Search,
-  TriangleAlert,
-} from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
-import { overviewQuery } from "@/api/queries";
+import { ArrowRight, Search } from "lucide-react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { overviewHistoryQuery, overviewQuery } from "@/api/queries";
+import type { ExceedanceSummary, OverviewHistoryStation } from "@/api/types";
 import { useRegion } from "@/region/region-context";
-import {
-  CategoryBar,
-  OverviewSkeleton,
-  RankList,
-  StatTile,
-  StationCard,
-  VerdictBar,
-} from "@/components/dashboard/overview";
+import { CategoryBar, OverviewSkeleton, StatCell, VerdictBar } from "@/components/dashboard/overview";
 import { CategoryLegend, NoDataSwatch } from "@/components/dashboard/tiles";
+import { Lines, Section, Square, stagger } from "@/components/instrument/primitives";
+import { StationMatrix } from "@/components/instrument/StationMatrix";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { strings } from "@/i18n/strings";
 import { control, dashboard, surface, typography } from "@/design/tokens";
-import { swatchStyle } from "@/lib/category-color";
 import { browserStorage, readRememberedStation, regionBounds } from "@/lib/dashboard";
 import {
   NO_DATA_FILTER,
   SORT_MODES,
   categoryDistribution,
   filterSummaries,
+  outlookFor,
   overviewCounts,
   parseSortMode,
-  rankByIndex,
   recommendationDistribution,
   sortSummaries,
   stationSummary,
@@ -89,28 +77,6 @@ export const Route = createFileRoute("/r/$regionId/")({
   component: RegionOverview,
 });
 
-function Tile({
-  title,
-  className,
-  action,
-  children,
-}: {
-  title: string;
-  className: string;
-  action?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <section className={`${dashboard.tile} ${className}`} aria-label={title}>
-      <div className={dashboard.tileHeader}>
-        <h2 className={dashboard.tileTitle}>{title}</h2>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 function RegionOverview() {
   const { regionId } = Route.useParams();
   const { q = "", pollutant: requestedPollutant, category, sort = "highest" } = Route.useSearch();
@@ -121,6 +87,9 @@ function RegionOverview() {
   const { data, isPending, error, refetch } = useQuery(overviewQuery(regionId));
 
   const pollutant = resolvePollutant(requestedPollutant, pollutants) ?? pollutants[0];
+  // The hour stripes: they decorate the rows, so a failure leaves the rows as they are.
+  const hours = useQuery({ ...overviewHistoryQuery(regionId, pollutant), enabled: !!pollutant });
+
   const summaries = useMemo(
     () => (data?.stations ?? []).map((station) => stationSummary(station, categories, pollutant)),
     [data, categories, pollutant],
@@ -135,6 +104,19 @@ function RegionOverview() {
     () => sortSummaries(filterSummaries(summaries, { query: q, category }), sort),
     [summaries, q, category, sort],
   );
+  const outlooks = useMemo(() => {
+    const map = new Map<string, ExceedanceSummary>();
+    for (const station of data?.stations ?? []) {
+      const outlook = outlookFor(station, pollutant);
+      if (outlook) map.set(station.station_id, outlook);
+    }
+    return map;
+  }, [data, pollutant]);
+  const history = useMemo(() => {
+    const map = new Map<string, OverviewHistoryStation>();
+    for (const station of hours.data?.stations ?? []) map.set(station.station_id, station);
+    return map;
+  }, [hours.data]);
   const bounds = useMemo(() => regionBounds(region.bbox), [region]);
 
   // The station this visitor opened last, read after mount: the server cannot know it.
@@ -158,27 +140,35 @@ function RegionOverview() {
   const filtered = q !== "" || category !== undefined;
 
   return (
-    <section className={surface.section}>
-      <header className="space-y-2">
-        <p className={typography.eyebrow}>{strings.overview.eyebrow}</p>
-        <h1 className={typography.pageTitle}>{region.name}</h1>
-        <p className={`${typography.body} ${surface.muted} max-w-2xl`}>
-          {strings.overview.subtitle}
-          {data && <> {strings.overview.updated(regionContext.formatAsOf(data.generated_at))}.</>}
-        </p>
+    <section className={dashboard.stack}>
+      <header className="grid items-end gap-x-12 gap-y-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <div>
+          <p className={`rise-in ${typography.eyebrow}`}>
+            {strings.instrument.kicker(counts.total, regionContext.aqiStandard)}
+          </p>
+          <h1 className={`mt-3 ${typography.mega}`}>
+            <Lines lines={[region.name, strings.instrument.headlineTail]} />
+          </h1>
+        </div>
+        <div className="rise-in space-y-4" style={stagger(3)}>
+          <p className={typography.lead}>
+            {data && counts.total > 0
+              ? strings.instrument.lead(counts.withReading, counts.total, counts.atOrAboveThreshold)
+              : strings.overview.subtitle}
+          </p>
+          {lastStation && (
+            <Link
+              to="/r/$regionId/s/$stationId"
+              params={{ regionId, stationId: lastStation.stationId }}
+              search={{}}
+              className={control.button}
+            >
+              {strings.overview.lastViewed(lastStation.name)}
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          )}
+        </div>
       </header>
-
-      {lastStation && (
-        <Link
-          to="/r/$regionId/s/$stationId"
-          params={{ regionId, stationId: lastStation.stationId }}
-          search={{}}
-          className={control.button}
-        >
-          {strings.overview.lastViewed(lastStation.name)}
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </Link>
-      )}
 
       {isPending && <OverviewSkeleton />}
       {error && <ErrorState error={error} onRetry={() => void refetch()} />}
@@ -189,41 +179,39 @@ function RegionOverview() {
 
       {data && counts.total > 0 && (
         <>
-          <div className={dashboard.statGrid}>
-            <StatTile
-              icon={<Activity className="h-4 w-4" />}
+          <ul className={dashboard.statGrid} style={stagger(4)}>
+            <StatCell
               label={strings.overview.statReporting}
               value={String(counts.withReading)}
               note={strings.overview.statReportingNote(counts.total)}
             />
-            <StatTile
-              icon={<TriangleAlert className="h-4 w-4" />}
+            <StatCell
               label={strings.overview.statAbove}
               value={String(counts.atOrAboveThreshold)}
               note={strings.overview.statAboveNote}
             />
-            <StatTile
-              icon={<CalendarCheck className="h-4 w-4" />}
+            <StatCell
               label={`${strings.overview.nextDays}: ${go.view.label}`}
               value={String(go.count)}
               note={strings.overview.statVerdictNote(counts.withOutlook, pollutantLabel)}
             />
-            <StatTile
-              icon={<CalendarX className="h-4 w-4" />}
+            <StatCell
               label={`${strings.overview.nextDays}: ${noGo.view.label}`}
               value={String(noGo.count)}
               note={strings.overview.statVerdictNote(counts.withOutlook, pollutantLabel)}
             />
-          </div>
+          </ul>
 
           <div className={dashboard.grid}>
-            <Tile title={strings.overview.nowBarTitle} className={dashboard.half}>
+            <Section
+              title={strings.overview.nowBarTitle}
+              note={strings.overview.statReportingNote(counts.total)}
+              className={dashboard.half}
+            >
               <CategoryBar distribution={distribution} />
-              <p className={`${typography.small} ${surface.muted} mt-3`}>
-                {data.attribution} · {regionContext.aqiStandard}
-              </p>
-            </Tile>
-            <Tile
+              <p className={`mt-3 ${typography.small} ${surface.muted}`}>{data.attribution}</p>
+            </Section>
+            <Section
               title={strings.overview.outlookBarTitle(pollutantLabel)}
               className={dashboard.half}
               action={
@@ -231,7 +219,7 @@ function RegionOverview() {
                   <label className="flex items-center gap-2">
                     <span className="sr-only">{strings.outlook.pollutantLabel}</span>
                     <select
-                      className={`${control.input} w-auto py-1`}
+                      className={`${control.input} w-auto py-1 ${typography.micro}`}
                       value={pollutant}
                       onChange={(event) => setSearch({ pollutant: event.target.value })}
                     >
@@ -246,62 +234,17 @@ function RegionOverview() {
               }
             >
               <VerdictBar counts={verdicts} />
-              <p className={`${typography.small} ${surface.muted} mt-3`}>
+              <p className={`mt-3 ${typography.small} ${surface.muted}`}>
                 {strings.outlook.estimateNote}
               </p>
-            </Tile>
-
-            <Tile title={strings.overview.highestTitle} className={dashboard.half}>
-              <RankList stations={rankByIndex(summaries, "highest")} regionId={regionId} />
-            </Tile>
-            <Tile title={strings.overview.lowestTitle} className={dashboard.half}>
-              <RankList stations={rankByIndex(summaries, "lowest")} regionId={regionId} />
-            </Tile>
-
-            <Tile
-              title={strings.dashboard.mapTitle}
-              className={dashboard.full}
-              action={
-                <button
-                  type="button"
-                  className={control.button}
-                  aria-expanded={mapOpen}
-                  onClick={() => setMapOpen((open) => !open)}
-                >
-                  {mapOpen ? strings.dashboard.hideMap : strings.dashboard.showMap}
-                </button>
-              }
-            >
-              <p className={`${typography.small} ${surface.muted} mb-2`}>
-                {strings.dashboard.mapHint}
-              </p>
-              <CategoryLegend categories={categories} />
-              {mapOpen && (
-                <div className="mt-3">
-                  <Suspense fallback={<LoadingState />}>
-                    <StationMap
-                      stations={summaries}
-                      selectedId={null}
-                      bounds={bounds}
-                      onSelect={openStation}
-                    />
-                  </Suspense>
-                </div>
-              )}
-            </Tile>
+            </Section>
           </div>
 
-          <section className="space-y-3" aria-labelledby="stations-heading">
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <h2 id="stations-heading" className={typography.sectionTitle}>
-                {strings.overview.stationsTitle}
-              </h2>
-              <p className={`${typography.small} ${surface.muted}`}>
-                {strings.stations.resultCount(visible.length, counts.total)}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
+          <Section
+            title={strings.instrument.matrixTitle(pollutantLabel)}
+            note={strings.stations.resultCount(visible.length, counts.total)}
+          >
+            <div className="mb-3 flex flex-wrap items-center gap-2">
               <label className="relative min-w-[14rem] flex-1">
                 <span className="sr-only">{strings.stations.searchLabel}</span>
                 <Search
@@ -337,7 +280,7 @@ function RegionOverview() {
             </div>
 
             <div
-              className="flex flex-wrap gap-1.5"
+              className="mb-5 flex flex-wrap gap-1.5"
               role="group"
               aria-label={strings.overview.filterLabel}
             >
@@ -362,11 +305,7 @@ function RegionOverview() {
                       setSearch({ category: category === item.id ? undefined : item.id })
                     }
                   >
-                    <span
-                      className={dashboard.swatch}
-                      style={swatchStyle(item.color)}
-                      aria-hidden="true"
-                    />
+                    <Square color={item.color} />
                     {item.label}
                     <span className={typography.number}>{item.count}</span>
                   </button>
@@ -390,10 +329,7 @@ function RegionOverview() {
             </div>
 
             {visible.length === 0 ? (
-              <EmptyState
-                title={strings.stations.noMatchTitle}
-                body={strings.stations.noMatchBody}
-              >
+              <EmptyState title={strings.stations.noMatchTitle} body={strings.stations.noMatchBody}>
                 {filtered && (
                   <button
                     type="button"
@@ -405,15 +341,44 @@ function RegionOverview() {
                 )}
               </EmptyState>
             ) : (
-              <ul className={dashboard.stationGrid}>
-                {visible.map((station) => (
-                  <li key={station.stationId}>
-                    <StationCard station={station} regionId={regionId} />
-                  </li>
-                ))}
-              </ul>
+              <StationMatrix
+                stations={visible}
+                regionId={regionId}
+                categories={categories}
+                outlooks={outlooks}
+                history={history}
+              />
             )}
-          </section>
+          </Section>
+
+          <Section
+            title={strings.dashboard.mapTitle}
+            action={
+              <button
+                type="button"
+                className={control.button}
+                aria-expanded={mapOpen}
+                onClick={() => setMapOpen((open) => !open)}
+              >
+                {mapOpen ? strings.dashboard.hideMap : strings.dashboard.showMap}
+              </button>
+            }
+          >
+            <p className={`mb-3 ${typography.small} ${surface.muted}`}>{strings.dashboard.mapHint}</p>
+            <CategoryLegend categories={categories} />
+            {mapOpen && (
+              <div className="mt-4">
+                <Suspense fallback={<LoadingState />}>
+                  <StationMap
+                    stations={summaries}
+                    selectedId={null}
+                    bounds={bounds}
+                    onSelect={openStation}
+                  />
+                </Suspense>
+              </div>
+            )}
+          </Section>
         </>
       )}
     </section>

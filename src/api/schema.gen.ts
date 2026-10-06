@@ -213,6 +213,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/overview/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Overview History
+         * @description The last `hours` measured hours of one pollutant at every active station,
+         *     each with its category: one request for a view of all stations side by side.
+         */
+        get: operations["get_overview_history_api_v1_overview_history_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/subscriptions/availability": {
         parameters: {
             query?: never;
@@ -556,6 +577,8 @@ export interface components {
             actual: number | null;
             /** Forecast Value */
             forecast_value: number | null;
+            /** Aqi Category */
+            aqi_category?: string | null;
         };
         /** ManageIn */
         ManageIn: {
@@ -613,6 +636,33 @@ export interface components {
             at_or_above_health_threshold?: boolean | null;
             /** Pollutants */
             pollutants: components["schemas"]["PollutantAqiOut"][];
+        };
+        /**
+         * OverviewHistoryOut
+         * @description The last hours of one pollutant at every active station, for a view that
+         *     shows the stations side by side. A missing hour is null, never a guess.
+         */
+        OverviewHistoryOut: {
+            /**
+             * Generated At
+             * Format: date-time
+             */
+            generated_at: string;
+            /** Pollutant */
+            pollutant: string;
+            /** Hours */
+            hours: string[];
+            /** Stations */
+            stations: components["schemas"]["OverviewHistoryStationOut"][];
+        };
+        /** OverviewHistoryStationOut */
+        OverviewHistoryStationOut: {
+            /** Station Id */
+            station_id: string;
+            /** Values */
+            values: (number | null)[];
+            /** Categories */
+            categories: (string | null)[];
         };
         /**
          * OverviewOut
@@ -1145,6 +1195,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OverviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_overview_history_api_v1_overview_history_get: {
+        parameters: {
+            query?: {
+                region_id?: string | null;
+                pollutant?: components["schemas"]["Pollutant"];
+                hours?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OverviewHistoryOut"];
                 };
             };
             /** @description Validation Error */

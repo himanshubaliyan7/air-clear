@@ -6,7 +6,7 @@
  * the header, always in view, instead of being tucked away at the foot of the page.
  */
 import { Link } from "@tanstack/react-router";
-import { Moon, Sun, Wind } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { strings } from "@/i18n/strings";
 import { control, shell } from "@/design/tokens";
@@ -99,13 +99,8 @@ export function AppHeader({
     <header className={shell.header}>
       <div className={shell.headerInner}>
         <Link to="/" className={shell.brand}>
-          <span className={shell.brandMark} aria-hidden="true">
-            <Wind className="h-5 w-5" />
-          </span>
-          <span className="min-w-0">
-            <span className={`${shell.brandName} block`}>{strings.app.name}</span>
-            <span className={shell.brandTagline}>{strings.app.tagline}</span>
-          </span>
+          <span className={shell.brandName}>{strings.app.shortName}</span>
+          <span className={shell.brandTagline}>{strings.app.tagline}</span>
         </Link>
 
         <div className={shell.nav}>

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { regionsQuery } from "@/api/queries";
 import { RegionProvider } from "@/region/region-context";
 import { AppHeader } from "@/components/AppHeader";
+import { StatusStrip } from "@/components/StatusStrip";
 import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { strings } from "@/i18n/strings";
 import { control, shell } from "@/design/tokens";
@@ -57,6 +58,7 @@ function RegionLayout() {
         {region && (
           <RegionProvider region={region} allRegions={data ?? [region]}>
             <Outlet />
+            <StatusStrip regionId={regionId} />
           </RegionProvider>
         )}
       </main>

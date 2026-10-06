@@ -12,6 +12,7 @@ import type {
   History,
   ModelHealth,
   Overview,
+  OverviewHistory,
   Region,
   Station,
   StationDetail,
@@ -43,6 +44,14 @@ export function getOverview(
   signal?: AbortSignal,
 ) {
   return apiGet<Overview>("/overview", { query: params, signal });
+}
+
+/** The last hours of one pollutant at every active station, each hour with its category. */
+export function getOverviewHistory(
+  params: { region_id?: string; pollutant?: string; hours?: number } = {},
+  signal?: AbortSignal,
+) {
+  return apiGet<OverviewHistory>("/overview/history", { query: params, signal });
 }
 
 export function getStation(stationId: string, signal?: AbortSignal) {
