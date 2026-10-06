@@ -8,7 +8,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { SelectionFields } from "@/components/subscription/SelectionFields";
 import { SubscriptionShell } from "@/components/subscription/SubscriptionShell";
 import { strings } from "@/i18n/strings";
-import { control, recommendationTone, surface, typography } from "@/design/tokens";
+import { control, surface, typography } from "@/design/tokens";
 import { hasErrors, validateSelection, type SelectionErrors } from "@/lib/subscription";
 
 const t = strings.subscriptions;
@@ -44,7 +44,7 @@ function SubscribePage() {
         <section
           role="note"
           aria-labelledby="demo-title"
-          className={`${recommendationTone.warning} rounded-md p-3`}
+          className="border border-foreground/40 bg-muted p-3"
         >
           <h2 id="demo-title" className={typography.sectionTitle}>
             {t.demoTitle}
