@@ -98,26 +98,129 @@ export const strings = {
     noDataBody:
       "When a forecast is missing, old or incomplete, the page says so in grey. Silence is never shown as Go.",
     pipelineTitle: "From sensor to verdict",
+    pipelineIntro:
+      "One path, run every hour. Each step hands the next only what it has checked.",
+    /** The steps of the system diagram, in the order data flows through them. */
     pipeline: [
       {
-        title: "Collect",
-        body: "Hourly sensor readings, the official index feed and weather data are pulled on a schedule, with retries and rate limiting.",
+        title: "Sources",
+        meta: "3 feeds",
+        body: "Hourly sensor readings, the official index feed, and weather data.",
+        items: ["OpenAQ · hourly readings", "CPCB · official index", "ERA5, Open-Meteo · weather"],
       },
       {
-        title: "Clean",
-        body: "Units are converted on the way in, duplicate stations are merged, and physically impossible readings are rejected before anything is computed from them.",
+        title: "Collect",
+        meta: "Airflow · every hour",
+        body: "Pulled on a schedule with retries and rate limiting. Units are converted on the way in; a unit that cannot be trusted is skipped, not guessed.",
+        items: [],
+      },
+      {
+        title: "Store",
+        meta: "PostgreSQL + TimescaleDB",
+        body: "Raw rows are kept as they arrived. Duplicate stations are merged and impossible values are dropped when read, so every later step sees the same hour.",
+        items: [],
       },
       {
         title: "Estimate",
-        body: "Each of the next days is estimated from the station's last 24 hours and the day-to-day spread seen in a year of history: a low, an expected and a high value.",
+        meta: "per region",
+        body: "Each of the next days is estimated from the station's last 24 hours and the day-to-day spread in a year of that region's history: a low, an expected and a high value.",
+        items: [],
       },
       {
         title: "Grade",
+        meta: "official category scale",
         body: "A day gets the worst category its mean reaches with at least a 40% chance. The verdict follows from that category.",
+        items: [],
       },
       {
-        title: "Check",
-        body: "Every night, past estimates are scored against what was measured. A watchdog raises an alert when data stops arriving or coverage drops.",
+        title: "Serve",
+        meta: "FastAPI",
+        body: "One API feeds this site and a daily email. The site decides nothing: every category and verdict it shows was computed on the server.",
+        items: ["This site", "Daily email"],
+      },
+    ],
+    checkTitle: "Check",
+    checkMeta: "every hour and every night",
+    checkBody:
+      "A watchdog looks at every region each hour and raises an alert when data stops arriving or coverage drops. Every night, past estimates are scored against what was measured.",
+    scheduleTitle: "One hour of the pipeline",
+    scheduleIntro:
+      "The jobs start at fixed minutes past every hour (UTC), each after the one it depends on.",
+    scheduleLabel: "A clock face marking the minutes at which each hourly job starts.",
+    hourly: [
+      { minute: 10, name: "Collect readings", note: "sensor hours from OpenAQ" },
+      { minute: 30, name: "Build features", note: "the last-24-hour mean per station" },
+      { minute: 40, name: "Official index", note: "current AQI from the CPCB feed" },
+      { minute: 45, name: "Estimate and grade", note: "five days per station" },
+      { minute: 55, name: "Watchdog", note: "per region: stale data, low coverage" },
+    ],
+    minutePast: (minute: number) => `:${String(minute).padStart(2, "0")}`,
+    slowerTitle: "Slower cycles",
+    slower: [
+      { when: "Every night", name: "Score past estimates against measurements" },
+      { when: "Every night", name: "Switch off stations that went dark, and back on when they return" },
+      { when: "Every evening", name: "Send the daily email" },
+      { when: "Every week", name: "Refit each region's day-to-day spread" },
+    ],
+    exampleTitle: "How one verdict is made",
+    exampleIntro:
+      "A worked example with made-up numbers. The station's mean over the last 24 hours was 80.",
+    exampleSteps: [
+      {
+        title: "Start from the last 24 hours",
+        body: "Nothing beat this in backtests: the next days look more like the last one than like any model's guess.",
+      },
+      {
+        title: "Widen it day by day",
+        body: "A year of the region's history says how far a day's mean usually lands from the previous 24 hours. That gives a low, an expected and a high value, and the range grows with each day ahead.",
+      },
+      {
+        title: "Grade the 40% point",
+        body: "If the day's mean has at least a 40% chance of reaching a worse category, the day takes that category. In this example that happens from day four.",
+      },
+    ],
+    exampleStart: "24 h",
+    exampleDay: (n: number) => `Day ${n}`,
+    exampleLimit: "limit",
+    exampleKey: "Line: low to high · diamond: expected · tick: the 40% point",
+    exampleLaneLabel: (low: number, expected: number, high: number) =>
+      `Low ${low}, expected ${expected}, high ${high}`,
+    exampleOverall: "The worst day decides the overall verdict.",
+    safetyTitle: "What is never shown as safe",
+    safetyIntro: "Each of these ends in a neutral answer, and none of them can read as Go.",
+    safety: [
+      { when: "The newest official reading is more than 6 hours old", then: "No current reading" },
+      { when: "The newest sensor hour is more than 24 hours old", then: "No outlook" },
+      { when: "One of the forecast days is missing", then: "No overall verdict" },
+      {
+        when: "A region has under 180 days of history from 3 stations",
+        then: "No outlook, never another city's numbers",
+      },
+      { when: "A sensor reports a physically impossible value", then: "That hour counts as missing" },
+      { when: "A reading's unit cannot be verified", then: "Skipped, not converted by guess" },
+    ],
+    notesTitle: "Found in production, and fixed",
+    notesIntro: "Four problems that only real data showed.",
+    notes: [
+      {
+        figure: "2,938,322",
+        unit: "µg/m³ in one reading",
+        body: "A sensor fault was stored as a measurement and became training data; one forecast reached 8,243. Readings outside a plausible range are now dropped wherever they are read.",
+      },
+      {
+        figure: "1.88×",
+        unit: "too much NO₂ for five days",
+        body: "A provider's unit label was trusted and the values converted. A second, independent source exposed it. A unit is now verified per region before it is used.",
+      },
+      {
+        figure: "64 of 68",
+        unit: "stations read Not recommended",
+        body: "The first rule flagged a day when a single hour was high, while the air was Moderate. Days are now graded by their mean, as the official scale defines them.",
+      },
+      {
+        figure: "7 → 73",
+        unit: "stations with a forecast",
+        body: "Official data arrives about twelve hours late, and a six-hour freshness limit rejected nearly all of it. The limit now matches how the data really arrives.",
       },
     ],
     accuracyTitle: "How good is it?",
