@@ -14,6 +14,14 @@ import { surface, typography } from "@/design/tokens";
 const row =
   "grid shrink-0 grid-cols-[auto_auto_auto] items-center gap-x-3 whitespace-nowrap border-r border-hair px-3 py-2.5 font-display text-[0.82rem] font-semibold uppercase leading-tight transition-[background-color,padding] duration-200 hover:bg-muted xl:w-full xl:grid-cols-[auto_minmax(0,1fr)_auto] xl:border-b xl:border-r-0 xl:px-1.5 xl:hover:pl-4";
 
+/**
+ * `relative` matters: the rows hold screen-reader-only text, which is absolutely positioned.
+ * In a scroller that is not positioned, that text escapes the clipping, and on a phone the
+ * whole page becomes as wide as the list.
+ */
+const list =
+  "relative flex overflow-x-auto border border-border xl:block xl:overflow-y-auto xl:overflow-x-hidden xl:border-x-0 xl:border-b-0";
+
 export function StationIndex({
   stations,
   regionId,
@@ -51,7 +59,7 @@ export function StationIndex({
       {visible.length === 0 ? (
         <p className={`${typography.eyebrow} py-2`}>{strings.stations.noMatchBody}</p>
       ) : (
-        <ul className="flex overflow-x-auto border border-border xl:block xl:overflow-y-auto xl:overflow-x-hidden xl:border-x-0 xl:border-b-0">
+        <ul className={list}>
           {visible.map((station) => (
             <li key={station.stationId} className="shrink-0">
               <Link
