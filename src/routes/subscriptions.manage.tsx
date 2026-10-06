@@ -9,6 +9,7 @@ import { DeleteDataControl } from "@/components/subscription/DeleteDataControl";
 import { SelectionFields } from "@/components/subscription/SelectionFields";
 import { SubscriptionShell } from "@/components/subscription/SubscriptionShell";
 import { TokenMissing, TokenRejected } from "@/components/subscription/TokenRejected";
+import { browserStorage, readRememberedStation } from "@/lib/dashboard";
 import { strings } from "@/i18n/strings";
 import { control, surface, typography } from "@/design/tokens";
 import {
@@ -25,13 +26,14 @@ const t = strings.subscriptions;
 export const Route = createFileRoute("/subscriptions/manage")({
   validateSearch: (search: Record<string, unknown>) => ({
     token: readToken(search["token"]) ?? undefined,
+    region: typeof search["region"] === "string" && search["region"] !== "" ? search["region"] : undefined,
   }),
   head: () => ({ meta: [{ title: `${t.manageTitle} — ${strings.app.name}` }, noReferrerMeta] }),
   component: ManagePage,
 });
 
 function ManagePage() {
-  const { token } = Route.useSearch();
+  const { token, region } = Route.useSearch();
   const { data: regions, isPending, error, refetch } = useQuery(regionsQuery());
 
   return (
@@ -42,9 +44,20 @@ function ManagePage() {
       {token && regions && regions.length === 0 && (
         <EmptyState title={strings.regions.noneTitle} body={strings.regions.noneBody} />
       )}
-      {token && regions && regions.length > 0 && <ManageForm token={token} regions={regions} />}
+      {token && regions && regions.length > 0 && <ManageForm token={token} regions={regions} requested={region} />}
     </SubscriptionShell>
   );
+}
+
+/**
+ * The region to start in. A subscription's stations are not revealed, so it is the
+ * one the link names, else the region of the station the visitor opened last on this
+ * device, else the first. A guess here is only a starting point: the select changes it.
+ */
+function startRegion(regions: readonly Region[], requested: string | undefined): Region {
+  const named = regions.find((r) => r.id === requested);
+  const lastId = readRememberedStation(browserStorage())?.regionId;
+  return named ?? regions.find((r) => r.id === lastId) ?? regions[0]!;
 }
 
 /**
@@ -52,10 +65,19 @@ function ManagePage() {
  * emailed token authorises anything, and no response carries personal data), so
  * the owner chooses their stations afresh here.
  */
-function ManageForm({ token, regions }: { token: string; regions: Region[] }) {
-  const [regionId, setRegionId] = useState(regions[0]!.id);
+function ManageForm({
+  token,
+  regions,
+  requested,
+}: {
+  token: string;
+  regions: Region[];
+  requested: string | undefined;
+}) {
+  const [start] = useState(() => startRegion(regions, requested));
+  const [regionId, setRegionId] = useState(start.id);
   const [stationIds, setStationIds] = useState<string[]>([]);
-  const [pollutants, setPollutants] = useState<string[]>(() => [...(regions[0]!.pollutants ?? [])]);
+  const [pollutants, setPollutants] = useState<string[]>(() => [...(start.pollutants ?? [])]);
   const [errors, setErrors] = useState<SelectionErrors>({});
   const save = useMutation({ mutationFn: manageSubscription });
   const stop = useMutation({ mutationFn: () => unsubscribe(token) });

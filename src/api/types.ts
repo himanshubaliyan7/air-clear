@@ -6,6 +6,7 @@
  */
 import type { components } from "./schema.gen";
 
+export type RegionBacktest = components["schemas"]["RegionBacktestOut"];
 export type Region = components["schemas"]["RegionOut"];
 export type AqiCategory = components["schemas"]["AqiCategoryOut"];
 export type Station = components["schemas"]["StationOut"];

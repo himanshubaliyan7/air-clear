@@ -7,6 +7,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/states";
 import { TimeChart } from "@/components/charts/TimeChart";
 import { strings } from "@/i18n/strings";
 import { control, surface, typography } from "@/design/tokens";
+import { useDocumentTitle } from "@/hooks/use-document-title";
 import { useRegion } from "@/region/region-context";
 import {
   calendarDayInZone,
@@ -69,6 +70,7 @@ function ForecastDetail() {
   const { region, pollutants, timeZone } = useRegion();
   const stations = useQuery(stationsQuery(regionId));
   const station = stations.data?.find((s) => s.station_id === stationId) ?? null;
+  useDocumentTitle(station?.name, strings.forecastDetail.pageTitle);
   const pollutant = resolvePollutant(search.pollutant, pollutants) ?? pollutants[0];
   const lookback = search.lookback ?? DEFAULT_LOOKBACK;
   const ready = station?.has_current_forecast === true && pollutant !== undefined;

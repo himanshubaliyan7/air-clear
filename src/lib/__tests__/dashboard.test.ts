@@ -111,8 +111,41 @@ describe("remembered station", () => {
     expect(readRememberedStation(storage)).toBeNull();
     rememberStation(storage, { regionId: "r1", stationId: "site:1" });
     expect(readRememberedStation(storage)).toEqual({ regionId: "r1", stationId: "site:1" });
-    forgetStation(storage);
+    forgetStation(storage, "r1");
     expect(readRememberedStation(storage)).toBeNull();
+  });
+
+  it("keeps one station per region and offers the latest visit without a region", () => {
+    const storage = memoryStorage();
+    rememberStation(storage, { regionId: "r1", stationId: "a" });
+    rememberStation(storage, { regionId: "r2", stationId: "b" });
+    expect(readRememberedStation(storage, "r1")).toEqual({ regionId: "r1", stationId: "a" });
+    expect(readRememberedStation(storage, "r2")).toEqual({ regionId: "r2", stationId: "b" });
+    expect(readRememberedStation(storage, "r3")).toBeNull();
+    expect(readRememberedStation(storage)).toEqual({ regionId: "r2", stationId: "b" });
+    rememberStation(storage, { regionId: "r1", stationId: "c" });
+    expect(readRememberedStation(storage)).toEqual({ regionId: "r1", stationId: "c" });
+  });
+
+  it("forgets one region without touching the others", () => {
+    const storage = memoryStorage();
+    rememberStation(storage, { regionId: "r1", stationId: "a" });
+    rememberStation(storage, { regionId: "r2", stationId: "b" });
+    forgetStation(storage, "r2");
+    expect(readRememberedStation(storage, "r2")).toBeNull();
+    expect(readRememberedStation(storage)).toEqual({ regionId: "r1", stationId: "a" });
+  });
+
+  it("still reads the old single slot and moves it across on the next write", () => {
+    const legacy = JSON.stringify({ regionId: "r1", stationId: "old" });
+    const storage = memoryStorage({ "air-clear:last-station": legacy });
+    expect(readRememberedStation(storage)).toEqual({ regionId: "r1", stationId: "old" });
+    expect(readRememberedStation(storage, "r1")).toEqual({ regionId: "r1", stationId: "old" });
+    expect(readRememberedStation(storage, "r2")).toBeNull();
+    rememberStation(storage, { regionId: "r2", stationId: "new" });
+    expect(readRememberedStation(storage, "r1")).toEqual({ regionId: "r1", stationId: "old" });
+    expect(readRememberedStation(storage, "r2")).toEqual({ regionId: "r2", stationId: "new" });
+    expect(storage.getItem("air-clear:last-station")).toBeNull();
   });
 
   it("ignores damaged values and unavailable storage", () => {
@@ -138,7 +171,7 @@ describe("remembered station", () => {
     };
     expect(readRememberedStation(broken)).toBeNull();
     expect(() => rememberStation(broken, { regionId: "r1", stationId: "s" })).not.toThrow();
-    expect(() => forgetStation(broken)).not.toThrow();
+    expect(() => forgetStation(broken, "r1")).not.toThrow();
     expect(readRememberedStation(null)).toBeNull();
   });
 });

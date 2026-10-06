@@ -122,14 +122,16 @@ export const strings = {
     ],
     accuracyTitle: "How good is it?",
     accuracyBody:
-      "Backtested on two held-out periods of the last pollution season. The grade was exactly right on about 6 in 10 days for tomorrow and about 5 in 10 for five days ahead. Days that turned out not recommended were called Go on 2–5% of days early in the season and 7–16% late in it.",
+      "Each region is backtested on held-out periods of past data: the grade the estimate gave is compared with the grade that was measured. The figures below are one row per region that has been checked.",
     accuracyLimits:
       "The estimate follows the air about a day behind, so it cannot foresee a sudden change. Several machine-learning models (gradient-boosted trees per station and pooled, with and without weather) were backtested against this simple rule. None did better, so the simpler and better-calibrated rule is the one in service.",
-    accuracyStats: [
-      { value: "≈ 61%", label: "exact grade, tomorrow" },
-      { value: "≈ 52%", label: "exact grade, five days ahead" },
-      { value: "2–5%", label: "bad days called Go, early season" },
-    ],
+    accuracyLabels: {
+      tomorrow: "exact grade, tomorrow",
+      dayFive: "exact grade, five days ahead",
+      badDays: "bad days called Go",
+    },
+    accuracyPeriod: (period: string) => `Checked on ${period}`,
+    accuracyNone: "No region has been checked against history yet.",
     stackTitle: "Built with",
     stack: [
       "Python",
@@ -246,6 +248,8 @@ export const strings = {
     thresholdBelow: "Below",
     thresholdUnknown: "No verdict",
     factAccuracy: "Forecast accuracy",
+    factAccuracyNone: "Not checked yet",
+    factAccuracyNoneNote: "This region's forecasts have not been checked against history yet.",
     statusLive: "Live",
     statusData: (when: string) => `Data ${when}`,
     statusReporting: "Reporting",
@@ -258,6 +262,15 @@ export const strings = {
     noneBody: "The service is not covering any region at the moment.",
     unknownTitle: "Unknown region",
     unknownBody: "This region is not covered by the service.",
+    homeKicker: (count: number) => `${count} regions`,
+    homeHeadline: "Choose a region",
+    homeLead:
+      "Each region has its own stations, its own air-quality standard and its own outlook.",
+    homeReporting: (reporting: number, total: number) => `${reporting} of ${total} stations reporting`,
+    homeAbove: (above: number) => `${above} at or above the health threshold`,
+    homeNoData: "No stations yet",
+    homeNoDataNote: "This region is set up, but no station is reporting here yet.",
+    homeUnavailable: "Figures unavailable",
   },
 
   time: {

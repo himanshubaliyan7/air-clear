@@ -20,29 +20,36 @@ export function StatCell({ label, value, note }: { label: string; value: string;
   );
 }
 
-const noDataSegment = "hatch outline outline-1 -outline-offset-1 outline-dashed outline-border";
+export const noDataSegment = "hatch outline outline-1 -outline-offset-1 outline-dashed outline-border";
+
+/** The strip alone: one segment per category present, then the stations without a reading. */
+export function CategoryStrip({ distribution }: { distribution: CategoryDistribution }) {
+  const present = distribution.categories.filter((category) => category.count > 0);
+  return (
+    <div className={dashboard.barTrack} aria-hidden="true">
+      {present.map((category, index) => (
+        <span
+          key={category.id}
+          className="grow-x min-w-1"
+          style={{ ...swatchStyle(category.color), ...stagger(index), flex: `${category.count} 0 0` }}
+        />
+      ))}
+      {distribution.noData > 0 && (
+        <span
+          className={`grow-x min-w-1 ${noDataSegment}`}
+          style={{ ...stagger(present.length), flex: `${distribution.noData} 0 0` }}
+        />
+      )}
+    </div>
+  );
+}
 
 /** Stations by current category: one strip, with every count written out below it. */
 export function CategoryBar({ distribution }: { distribution: CategoryDistribution }) {
   const { categories, noData } = distribution;
-  const present = categories.filter((category) => category.count > 0);
   return (
     <div>
-      <div className={dashboard.barTrack} aria-hidden="true">
-        {present.map((category, index) => (
-          <span
-            key={category.id}
-            className="grow-x min-w-1"
-            style={{ ...swatchStyle(category.color), ...stagger(index), flex: `${category.count} 0 0` }}
-          />
-        ))}
-        {noData > 0 && (
-          <span
-            className={`grow-x min-w-1 ${noDataSegment}`}
-            style={{ ...stagger(present.length), flex: `${noData} 0 0` }}
-          />
-        )}
-      </div>
+      <CategoryStrip distribution={distribution} />
       <ul className={dashboard.barLegend}>
         {categories.map((category) => (
           <li key={category.id} className="flex items-center gap-2">
