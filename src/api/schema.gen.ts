@@ -726,6 +726,22 @@ export interface components {
             /** Threshold Averaging */
             threshold_averaging: string | null;
         };
+        /**
+         * RegionBacktestOut
+         * @description How well the daily verdicts matched what happened, measured on past days.
+         */
+        RegionBacktestOut: {
+            /** Period */
+            period: string;
+            /** Exact Grade Tomorrow */
+            exact_grade_tomorrow: number;
+            /** Exact Grade Day 5 */
+            exact_grade_day_5: number;
+            /** No Go Called Go Low */
+            no_go_called_go_low: number;
+            /** No Go Called Go High */
+            no_go_called_go_high: number;
+        };
         /** RegionOut */
         RegionOut: {
             /** Id */
@@ -748,6 +764,7 @@ export interface components {
             aqi_categories: components["schemas"]["AqiCategoryOut"][];
             /** Health Threshold Category */
             health_threshold_category: string;
+            backtest?: components["schemas"]["RegionBacktestOut"] | null;
         };
         /** StationDetailOut */
         StationDetailOut: {

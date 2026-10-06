@@ -6,19 +6,8 @@
  */
 import type { components } from "./schema.gen";
 
-/**
- * How a region's forecasts did against held-out history; every figure is a share
- * from 0 to 1. Null for a region that has not been backtested.
- */
-export interface RegionBacktest {
-  period: string;
-  exact_grade_tomorrow: number;
-  exact_grade_day_5: number;
-  no_go_called_go_low: number;
-  no_go_called_go_high: number;
-}
-
-export type Region = components["schemas"]["RegionOut"] & { backtest?: RegionBacktest | null };
+export type RegionBacktest = components["schemas"]["RegionBacktestOut"];
+export type Region = components["schemas"]["RegionOut"];
 export type AqiCategory = components["schemas"]["AqiCategoryOut"];
 export type Station = components["schemas"]["StationOut"];
 export type StationDetail = components["schemas"]["StationDetailOut"];
